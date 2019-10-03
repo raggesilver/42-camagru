@@ -3,6 +3,7 @@ const path    = require('path');
 
 const routes = [
   { url: '/user', path: 'user.js' },
+  { url: '/auth', path: 'auth.js' },
 ];
 
 for (const route of routes) {
