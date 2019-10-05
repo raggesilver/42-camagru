@@ -3,6 +3,7 @@ const mongoose    = require('mongoose');
 const bodyParser  = require('body-parser');
 const history     = require('connect-history-api-fallback');
 const path        = require('path');
+const cors        = require('cors');
 const app         = express();
 
 function log(...args) {
@@ -13,12 +14,25 @@ function log(...args) {
 /**
  * Initialize the app
  */
-app.use(history());
+app.use(cors({ credentials: true, origin: true }));
+const historyMiddleware = history({ verbose: true });
+// Do redirect /api calls to front-end
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api'))
+    next();
+  else
+    historyMiddleware(req, res, next);
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api', require('./api/app'));
 app.use(express.static(path.join(__dirname, 'front', 'dist')));
+
+app.use((req, res, next) => {
+  res.status(404).end('Not found');
+});
 
 function startApp() {
   app.listen(process.env.PORT || 3000, function () {

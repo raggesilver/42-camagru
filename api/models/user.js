@@ -6,7 +6,7 @@ const crypto    = require('crypto');
 const schema = new mongoose.Schema({
   username: { type: String },
   password: { type: String },
-  email: { type: String },
+  email:    { type: String },
   verified: { type: Boolean, default: false },
   // Settings
   settings: {
@@ -44,19 +44,27 @@ schema.methods.getToken = function () {
   }, process.env.JWT_KEY);
 };
 
-/**
- * Set this.code to a new token. Tokens are valid for one hour. This function
- * does not save the new token to the user in the database (you need to call
- * .save() manually after)
- * @return {String} the new token.
- */
 schema.statics.generateVerificationCode = () => {
   code = {
     tok: crypto.randomBytes(20).toString('hex'),
-    exp: new Date() + 60*60*1000
+    exp: new Date()
   };
 
+  code.exp.setHours(code.exp.getHours() + 1);
+
   return (code);
+};
+
+schema.methods.getPersonalData = function () {
+  let data = {
+         _id: this._id,
+       email: this.email,
+    username: this.username,
+    settings: this.settings,
+    verified: this.verified,
+  };
+
+  return (data);
 };
 
 module.exports = mongoose.model('user', schema);

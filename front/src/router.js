@@ -6,7 +6,7 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: process.env.APP_URL,
   routes: [
     {
       path: '/',
@@ -14,12 +14,22 @@ export default new Router({
       component: Home
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/login',
+      name: 'login',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      component: () => import('./views/Login.vue')
+    },
+    {
+      path: '/validate/:tok',
+      name: 'validate',
+      component: () => import('./views/Validate.vue')
+    },
+    {
+      path: '*',
+      name: '404',
+      component: () => import(/* webpackChunkName: "about" */ './views/404.vue')
     }
   ]
 })
