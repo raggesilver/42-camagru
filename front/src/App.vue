@@ -1,12 +1,12 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <div v-if="this.logged" id="nav">
       <router-link to="/">Home</router-link>
-      <router-link
-        v-if="!this.logged"
-        to="/login"
-      >Login
-      </router-link>
+      <a href="#" @click="logout">Logout</a>
+    </div>
+    <div v-else id="nav">
+      <router-link to="/about">About</router-link>
+      <router-link to="/login">Login</router-link>
     </div>
     <router-view/>
   </div>
@@ -18,6 +18,15 @@ import { mapState } from 'vuex';
 export default {
   computed: {
     ...mapState(['logged'])
+  },
+  methods: {
+    logout(e) {
+      e.preventDefault();
+      if (window.confirm('Do you really want to logout?'))
+        this.$store
+          .dispatch('logout')
+          .then(() => this.$router.push('/about'));
+    }
   }
 }
 </script>

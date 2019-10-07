@@ -30,9 +30,6 @@ export default {
       loading: false
     };
   },
-  mounted() {
-
-  },
   methods: {
     onSubmit(e) {
       // Prevent form submit
@@ -42,14 +39,9 @@ export default {
       // Reset error message
       this.errorMessage = null;
 
-      this.$http.post('/api/auth/login', {
-           email: this.email,
-        password: this.password
-      })
-        .then(res => {
-          this.$store.commit('setToken', res.data.token);
-          this.$store.commit('setUser', res.data.user);
-        })
+      this.$store
+        .dispatch('login', { email: this.email, password: this.password })
+        .then(() => this.$router.push('/'))
         .catch(err => {
           if (err.response && err.response.data.error)
             this.errorMessage = err.response.data.error;

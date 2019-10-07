@@ -1,17 +1,25 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import store from './store'
 
 Vue.use(Router)
 
-export default new Router({
+function guard(to, from, next) {
+  if (store.state.logged)
+    return next();
+  next('/about');
+}
+
+const router = new Router({
   mode: 'history',
   base: process.env.APP_URL,
   routes: [
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: Home,
+      beforeEnter: guard
     },
     {
       path: '/login',
@@ -20,6 +28,11 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('./views/Login.vue')
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('./views/About.vue')
     },
     {
       path: '/validate/:tok',
@@ -32,4 +45,6 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/404.vue')
     }
   ]
-})
+});
+
+export default router;

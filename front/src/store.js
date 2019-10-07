@@ -1,30 +1,57 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
+import axios from 'axios';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     logged: !!localStorage.getItem('token'),
     token: localStorage.getItem('token'),
-    user: (() => {
-      let user = localStorage.getItem('user');
-      if (user)
-        return JSON.parse(user);
-      return null;
-    })(),
+    user: null,
   },
   mutations: {
     setToken: (state, data) => {
       state.token = data;
       state.logged = !!data;
-      localStorage.setItem('token', data);
     },
     setUser: (state, data) => {
       state.user = data;
-      localStorage.setItem('user', data ? JSON.stringify(data) : null);
+    },
+    logout(state) {
+      state.token = null;
+      state.user = null;
+      state.logged = false;
     }
   },
   actions: {
+    login(context, data) {
+      return new Promise((resolve, reject) => {
+        axios.post('/api/auth/login', data)
+          .then(res => {
+            const token = res.data.token;
+            const user  = res.data.user;
+
+            axios.defaults.headers.common['Authorization'] = token;
+
+            localStorage.setItem('token', token);
+
+            context.commit('setToken', token);
+            context.commit('setUser', user);
+
+            return resolve(res);
+          })
+          .catch(err => reject(err));
+      });
+    },
+    logout(context) {
+      return new Promise((resolve) => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        context.commit('logout');
+        delete axios.defaults.headers.common['Authorization'];
+        resolve();
+      });
+    }
   }
-})
+});

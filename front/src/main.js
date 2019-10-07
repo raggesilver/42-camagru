@@ -7,23 +7,22 @@ import axios from 'axios'
 Vue.config.productionTip = false
 Vue.config.devtools = true
 
-let ax = axios.create({
-  baseURL: 'http://localhost:3000'
-});
+axios.defaults.baseURL = 'http://localhost:3000';
 
-// ax.interceptors.response.use(
-//   undefined,
-//   function (error) {
-//     if (typeof error.response !== 'undefined') {
-//       if (error.response.status === 401)
-//         return router.go('/login');
-//       return Promise.resolve(error);
-//     }
+let token = localStorage.getItem('token');
+if (token)
+  axios.defaults.headers.common['Authorization'] = token;
+
+// axios.interceptors.response.use(
+//   response => response,
+//   error => {
+//     if (error.response && error.response.status == 401)
+//       return router.replace('/about');
 //     return Promise.reject(error);
 //   }
 // );
 
-Vue.prototype.$http = ax;
+Vue.prototype.$http = axios;
 
 new Vue({
   router,
