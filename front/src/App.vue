@@ -32,6 +32,10 @@ export default {
 </script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -51,5 +55,32 @@ export default {
 
 #nav a.router-link-exact-active {
   color: #42b983;
+}
+
+/* Global CSS */
+
+a,
+a:visited {
+  color: #42b983;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+button.icon,
+button.icon-button {
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 3px .5em;
+  cursor: pointer;
+}
+
+.flex-right {
+  margin-left: auto !important;
 }
 </style>

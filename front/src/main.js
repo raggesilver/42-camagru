@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import 'vue-awesome/icons'
+import Icon from 'vue-awesome/components/Icon'
 
 Vue.config.productionTip = false
 Vue.config.devtools = true
@@ -13,16 +15,9 @@ let token = localStorage.getItem('token');
 if (token)
   axios.defaults.headers.common['Authorization'] = token;
 
-// axios.interceptors.response.use(
-//   response => response,
-//   error => {
-//     if (error.response && error.response.status == 401)
-//       return router.replace('/about');
-//     return Promise.reject(error);
-//   }
-// );
-
 Vue.prototype.$http = axios;
+
+Vue.component('v-icon', Icon)
 
 new Vue({
   router,
