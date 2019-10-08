@@ -8,7 +8,11 @@ export default new Vuex.Store({
   state: {
     logged: !!localStorage.getItem('token'),
     token: localStorage.getItem('token'),
-    user: null,
+    user: (() => {
+      let d = localStorage.getItem('user');
+      if (d) return JSON.parse(d);
+      return null;
+    })(),
   },
   mutations: {
     setToken: (state, data) => {
@@ -51,6 +55,21 @@ export default new Vuex.Store({
         context.commit('logout');
         delete axios.defaults.headers.common['Authorization'];
         resolve();
+      });
+    },
+    getUser(context) {
+      return new Promise((resolve, reject) => {
+        axios.get('/api/user/me')
+          .then(({ data }) => {
+            localStorage.setItem('user', JSON.stringify(data));
+            context.commit('setUser', data);
+            return resolve(data);
+          })
+          .catch((err) => {
+            // TODO: maybe this should also context.commit('setUser', null)
+            localStorage.removeItem('user');
+            return reject(err);
+          });
       });
     }
   }

@@ -20,7 +20,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import axios from 'axios';
 
 export default {
   computed: {
@@ -38,8 +37,9 @@ export default {
         this.doLogout();
     },
     fetchUser() {
-      axios.get('/api/user/me')
-        .then(({ data }) => this.$store.commit('setUser', data))
+      this.$store.dispatch('getUser')
+        // FIXME: remove console.log
+        .then(() => console.log('User updated, cache overwritten.'))
         .catch((err) => {
           if (err.response && err.response.status == 401)
             this.doLogout();
@@ -51,7 +51,6 @@ export default {
   mounted() {
     if (this.logged)
       this.fetchUser();
-      // ;
   }
 }
 </script>
