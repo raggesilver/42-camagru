@@ -13,7 +13,7 @@ axios.defaults.baseURL = 'http://localhost:3000';
 
 let token = localStorage.getItem('token');
 if (token)
-  axios.defaults.headers.common['Authorization'] = token;
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 
 Vue.prototype.$http = axios;
 

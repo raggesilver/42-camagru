@@ -1,32 +1,50 @@
 <template>
   <div id="app">
-    <div v-if="this.logged" id="nav">
+    <!-- <div v-if="this.logged" id="nav">
       <router-link to="/">Home</router-link>
       <a href="#" @click="logout">Logout</a>
     </div>
     <div v-else id="nav">
       <router-link to="/about">About</router-link>
       <router-link to="/login">Login</router-link>
-    </div>
+    </div> -->
     <router-view/>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import axios from 'axios';
 
 export default {
   computed: {
     ...mapState(['logged'])
   },
   methods: {
+    doLogout() {
+      this.$store
+        .dispatch('logout')
+        .then(() => this.$router.push('/about'));
+    },
     logout(e) {
       e.preventDefault();
       if (window.confirm('Do you really want to logout?'))
-        this.$store
-          .dispatch('logout')
-          .then(() => this.$router.push('/about'));
+        this.doLogout();
+    },
+    fetchUser() {
+      axios.get('/api/user/me')
+        .then(({ data }) => this.$store.commit('setUser', data))
+        .catch((err) => {
+          if (err.response && err.response.status == 401)
+            this.doLogout();
+          else
+            console.log(err);
+        });
     }
+  },
+  mounted() {
+    if (this.logged)
+      this.fetchUser();
   }
 }
 </script>
@@ -71,6 +89,12 @@ a:visited {
   border-radius: 50%;
 }
 
+.profile-pic.big { width: 60px; height: 60px }
+.profile-pic.large { width: 100px; height: 100px }
+
+.profile-pic.small { width: 30px; height: 30px }
+.profile-pic.tiny { width: 20px; height: 20px }
+
 button.icon,
 button.icon-button {
   background: transparent;
@@ -78,9 +102,16 @@ button.icon-button {
   margin: 0;
   padding: 3px .5em;
   cursor: pointer;
+  text-align: center;
+  line-height: 50%;
+  color: #2c3e50;
 }
 
 .flex-right {
   margin-left: auto !important;
+}
+
+.text-muted {
+  color: rgba(0, 0, 0, .7);
 }
 </style>

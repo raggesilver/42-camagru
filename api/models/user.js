@@ -7,6 +7,7 @@ const schema = new mongoose.Schema({
   username: { type: String },
   password: { type: String },
   email:    { type: String },
+  picture:  { type: String, default: 'https://imgur.com/IqlHUiV.png' },
   verified: { type: Boolean, default: false },
   // Settings
   settings: {
@@ -62,6 +63,17 @@ schema.methods.getPersonalData = function () {
     username: this.username,
     settings: this.settings,
     verified: this.verified,
+     picture: this.picture,
+  };
+
+  return (data);
+};
+
+schema.methods.getPublicData = function () {
+  let data = {
+         _id: this._id,
+    username: this.username,
+     picture: this.picture,
   };
 
   return (data);

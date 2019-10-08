@@ -9,22 +9,24 @@
         >{{ post.user.username }}
         </router-link>
       </div>
+      <div class="info">
+        <span class="text-muted" style="font-size: 9pt;">{{ postDate }}</span>
+      </div>
       <button class="icon-button flex-right">
-        <v-icon name="ellipsis-h"/>
+        <v-icon name="ellipsis-v" scale="0.85"/>
       </button>
     </div>
     <!-- Foreach image in post -->
-    <img v-for="(img, i) in post.media" :key="i" :src="img">
+    <img v-for="(img, i) in post.media" :key="i" :src="img"
+      loading="lazy" decode="async" />
     <!-- Div with action buttons (like, comment) -->
     <div class="actions">
-      <button v-if="!post.liked" class="icon-button">
-        <v-icon name="regular/heart" scale="1.5"/>
-      </button>
-      <button v-else class="icon-button">
-        <v-icon name="heart" style="color: red;" scale="1.5"/>
+      <button class="icon-button" @click="onLikeClicked">
+        <v-icon v-if="post.liked" name="heart" style="color: red;" scale="1"/>
+        <v-icon v-else name="regular/heart" scale="1"/>
       </button>
       <button class="icon-button">
-        <v-icon name="regular/comment" scale="1.5"/>
+        <v-icon name="regular/comment" scale="1"/>
       </button>
     </div>
     <div class="comments">
@@ -35,6 +37,8 @@
 
 <script>
 import Comment from '@/components/Comment.vue';
+import { timeSince } from '@/modules/moment.js';
+import axios from 'axios';
 
 export default {
   props: {
@@ -45,9 +49,28 @@ export default {
       comments: [],
     };
   },
+  computed: {
+    postDate() {
+      return timeSince(new Date(this.$props.post.createdAt));
+    }
+  },
   components: {
     Comment,
   },
+  methods: {
+    onLikeClicked() {
+      axios.post(`/api/post/${this.$props.post._id}/like`)
+        .then(({ data }) => {
+          console.log(data);
+          if (data.liked)
+            this.$props.post.liked = data.liked;
+        })
+        .catch(err => console.log(err));
+    }
+  },
+  mounted() {
+    this.$props.post.liked = this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
+  }
 }
 </script>
 
@@ -84,12 +107,13 @@ img:not(.profile-pic) {
 
 .feed-card {
   max-width: 600px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   border-radius: 5px;
   padding: 6px 1em;
   padding-bottom: 0;
   margin: 0 auto;
   text-align: left;
+  background: white;
 }
 
 .feed-card:not(:last-child) {

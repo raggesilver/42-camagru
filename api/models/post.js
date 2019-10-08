@@ -1,13 +1,13 @@
 const mongoose  = require('mongoose');
 
 const schema = new mongoose.Schema({
-   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
      media: { type: Array },
       text: { type: String },
-     likes: [{
-       user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
-     }],
-  comments: [ mongoose.Schema.Types.ObjectId ]
+     likes: { type: [ mongoose.Schema.Types.ObjectId ], ref: 'user' },
+  comments: { type: [ mongoose.Schema.Types.ObjectId ], ref: 'comment' },
+}, {
+  timestamps: true
 });
 
 // schema.statics.generateVerificationCode = () => {

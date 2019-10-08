@@ -32,7 +32,7 @@ export default new Vuex.Store({
             const token = res.data.token;
             const user  = res.data.user;
 
-            axios.defaults.headers.common['Authorization'] = token;
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
 
             localStorage.setItem('token', token);
 

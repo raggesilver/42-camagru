@@ -3,7 +3,7 @@
     <p>
       <router-link :to="`/profile/${comment.username}`" class="username"
       >{{ comment.username }}</router-link>
-      <span v-html="compText"></span>
+      <small v-html="compText"></small>
     </p>
   </div>
 </template>

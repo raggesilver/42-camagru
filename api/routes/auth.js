@@ -86,10 +86,8 @@ const loginPostParams = {
 };
 
 router.post('/login', reqparams(loginPostParams), async (req, res) => {
-  console.log('Got login', req.body);
   try {
     let user = await User.findOne({ email: req.body.email });
-    // console.log('Here 1', user, await user.comparePassword(req.body.password));
     if (!user || !(await user.comparePassword(req.body.password)))
       return res.status(401).json({ error: 'Invalid credentials' });
 
@@ -98,7 +96,6 @@ router.post('/login', reqparams(loginPostParams), async (req, res) => {
        user: user.getPersonalData()
     };
 
-    console.log('Here 3 payload:', payload);
     return res.status(200).json(payload);
   }
   catch(e) {
