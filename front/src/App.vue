@@ -8,7 +8,13 @@
       <router-link to="/about">About</router-link>
       <router-link to="/login">Login</router-link>
     </div> -->
-    <router-view/>
+
+    <!-- Make the content only be loaded once the user's data is fetched -->
+    <router-view v-if="(this.logged && this.user) || !(this.logged)"/>
+    <div v-else class="loader text-muted">
+      <v-icon name="circle-notch" spin scale="1.5" />
+      <!-- <span>Loading user data</span> -->
+    </div>
   </div>
 </template>
 
@@ -18,7 +24,7 @@ import axios from 'axios';
 
 export default {
   computed: {
-    ...mapState(['logged'])
+    ...mapState(['logged', 'user'])
   },
   methods: {
     doLogout() {
@@ -45,6 +51,7 @@ export default {
   mounted() {
     if (this.logged)
       this.fetchUser();
+      // ;
   }
 }
 </script>
@@ -113,5 +120,19 @@ button.icon-button {
 
 .text-muted {
   color: rgba(0, 0, 0, .7);
+}
+</style>
+
+<style scoped>
+.loader {
+  position: fixed;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  background: white;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>

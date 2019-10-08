@@ -22,7 +22,7 @@
     <!-- Div with action buttons (like, comment) -->
     <div class="actions">
       <button class="icon-button" @click="onLikeClicked">
-        <v-icon v-if="post.liked" name="heart" style="color: red;" scale="1"/>
+        <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);" scale="1"/>
         <v-icon v-else name="regular/heart" scale="1"/>
       </button>
       <button class="icon-button">
@@ -47,6 +47,7 @@ export default {
   data() {
     return {
       comments: [],
+      liked: false
     };
   },
   computed: {
@@ -61,15 +62,13 @@ export default {
     onLikeClicked() {
       axios.post(`/api/post/${this.$props.post._id}/like`)
         .then(({ data }) => {
-          console.log(data);
-          if (data.liked)
-            this.$props.post.liked = data.liked;
+          this.liked = !!data.liked;
         })
         .catch(err => console.log(err));
     }
   },
   mounted() {
-    this.$props.post.liked = this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
+    this.liked = this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
   }
 }
 </script>
