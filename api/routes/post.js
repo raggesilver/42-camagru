@@ -1,8 +1,9 @@
 const router  = require('express').Router();
 const guard   = require('../modules/guard');
 const Post    = require('../models/post');
+const Comment = require('../models/comment');
 
-const { reqparams } = require('@raggesilver/reqparams');
+const { reqparams, notEmpty } = require('@raggesilver/reqparams');
 
 // Route to get all posts
 router.get('/', guard, async (req, res) => {
@@ -13,7 +14,17 @@ router.get('/', guard, async (req, res) => {
     offset = tmp;
 
   let posts = await Post.find().sort('-createdAt').skip(offset).limit(10)
-    .populate('user', 'username picture').exec();
+    .populate({ path: 'user', select: 'username picture'})
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'username picture'
+      }
+    })
+    // .populate('comments')
+    // .populate({ path: 'comments.user', select: 'username picture'})
+    .exec();
 
   return res.json(posts);
 });
@@ -58,6 +69,34 @@ router.post('/:id/like', guard, async (req, res, next) => {
     }
     else
       return res.status(200).json({});
+  }
+  catch (e) { return next(e); }
+});
+
+const commentPostParams = {
+  text: { validate: notEmpty },
+};
+
+router.post('/:id/comment', [ guard, reqparams(commentPostParams) ],
+async (req, res) => {
+  try {
+    let post = await Post.findById(req.params.id);
+
+    if (post) {
+      let comment = new Comment({
+        text: req.body.text.trim(),
+        user: req.user._id,
+        likes: []
+      });
+
+      await comment.save();
+
+      post.comments.push(comment._id);
+      await post.save();
+
+      return res.status(200).json({ comment });
+    }
+    return res.status(200).json({});
   }
   catch (e) { return next(e); }
 });

@@ -107,10 +107,19 @@ button.icon-button {
   border: none;
   margin: 0;
   padding: 3px .5em;
-  cursor: pointer;
   text-align: center;
   line-height: 50%;
   color: #2c3e50;
+}
+
+button.icon:not(:disabled),
+button.icon-button:not(:disabled) {
+  cursor: pointer;
+}
+
+button.icon:disabled,
+button.icon-button:disabled {
+  opacity: .4;
 }
 
 .flex-right {
@@ -120,6 +129,30 @@ button.icon-button {
 .text-muted {
   color: rgba(0, 0, 0, .7);
 }
+
+.d-flex   { display: flex; }
+.d-block  { display: block; }
+.d-inline { display: inline; }
+.d-table  { display: table; }
+
+.flex-col { flex-direction: column; }
+.flex-rcol { flex-direction: column-reverse; }
+.flex-row { flex-direction: row; }
+.flex-rrow { flex-direction: row-reverse; }
+
+.flex-1 { flex: 1; }
+
+.vertical-slider {
+  transition-property: all;
+  transition-duration: .5s;
+  overflow-y: hidden;
+  max-height: 100px;
+}
+
+.vertical-slider:not(.show) {
+  max-height: 0;
+}
+
 </style>
 
 <style scoped>

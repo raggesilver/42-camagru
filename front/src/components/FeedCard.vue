@@ -9,11 +9,12 @@
         >{{ post.user.username }}
         </router-link>
       </div>
+      <!-- Flex post time -->
       <div class="info">
         <span class="text-muted" style="font-size: 9pt;">{{ postDate }}</span>
       </div>
       <button class="icon-button flex-right">
-        <v-icon name="ellipsis-v" scale="0.85"/>
+        <v-icon name="ellipsis-v" scale="0.85" />
       </button>
     </div>
     <!-- Foreach image in post -->
@@ -22,16 +23,32 @@
     <!-- Div with action buttons (like, comment) -->
     <div class="actions">
       <button class="icon-button" @click="onLikeClicked">
-        <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);" scale="1"/>
-        <v-icon v-else name="regular/heart" scale="1"/>
+        <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);"
+          scale="1" />
+        <v-icon v-else name="regular/heart" scale="1" />
       </button>
-      <button class="icon-button">
-        <v-icon name="regular/comment" scale="1"/>
+      <button class="icon-button" @click="onShowNewComment">
+        <v-icon v-if="showComment" name="comment" scale="1" />
+        <v-icon v-else name="regular/comment" scale="1" />
       </button>
     </div>
+    <!-- FIXME: There should be a component called CommentSection to manage the
+    comments of a post (to handle 'see more') -->
+    <!-- Comments section -->
     <div class="comments">
-      <Comment :comment="{ username: post.user.username, text: post.text }"/>
+      <Comment :comment="{ user: { username: post.user.username }, text: post.text }"/>
+      <Comment v-for="comment in post.comments" :key="comment._id" :comment="comment"/>
     </div>
+    <!-- NewComment -->
+    <form class="new-comment d-flex flex-row vertical-slider"
+      :class="{ show: showComment }"
+      @submit="onNewComment">
+      <input type="text" v-model="comment" class="flex-1"
+        placeholder="Write a comment" :disabled="commenting">
+      <button class="icon-button" type="submit" :disabled="commenting">
+        <v-icon name="regular/paper-plane" />
+      </button>
+    </form>
   </div>
 </template>
 
@@ -47,7 +64,10 @@ export default {
   data() {
     return {
       comments: [],
-      liked: false
+      liked: false,
+      comment: null,
+      commenting: false,
+      showComment: false
     };
   },
   computed: {
@@ -65,7 +85,14 @@ export default {
           this.liked = !!data.liked;
         })
         .catch(err => console.log(err));
-    }
+    },
+    onNewComment(e) {
+      e.preventDefault();
+      console.log(this.comment);
+    },
+    onShowNewComment() {
+      this.showComment = !this.showComment;
+    },
   },
   mounted() {
     this.liked = this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
@@ -129,5 +156,21 @@ img:not(.profile-pic) {
   margin-right: 1em;
   padding-left: 0;
   padding-right: 0;
+}
+
+.new-comment {
+  margin: 0 -1em;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.new-comment input {
+  padding: 1em 1em 1em 2em;
+  border: none;
+  background: transparent;
+  height: 40px;
+}
+
+.new-comment button {
+  padding-right: 1.5em;
 }
 </style>
