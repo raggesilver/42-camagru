@@ -22,11 +22,13 @@
       loading="lazy" decode="async" />
     <!-- Div with action buttons (like, comment) -->
     <div class="actions">
+      <!-- Like button -->
       <button class="icon-button" @click="onLikeClicked">
         <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);"
           scale="1" />
         <v-icon v-else name="regular/heart" scale="1" />
       </button>
+      <!-- Comment button -->
       <button class="icon-button" @click="onShowNewComment">
         <v-icon v-if="showComment" name="comment" scale="1" />
         <v-icon v-else name="regular/comment" scale="1" />
@@ -36,8 +38,12 @@
     comments of a post (to handle 'see more') -->
     <!-- Comments section -->
     <div class="comments">
-      <Comment :comment="{ user: { username: post.user.username }, text: post.text }"/>
-      <Comment v-for="comment in post.comments" :key="comment._id" :comment="comment"/>
+      <!-- First comment has only poster's username and post text -->
+      <Comment
+        :comment="{ user: { username: post.user.username }, text: post.text }"/>
+      <!-- All other comments -->
+      <Comment
+        v-for="comment in post.comments" :key="comment._id" :comment="comment"/>
     </div>
     <!-- NewComment -->
     <form class="new-comment d-flex flex-row vertical-slider"
@@ -95,7 +101,8 @@ export default {
     },
   },
   mounted() {
-    this.liked = this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
+    this.liked =
+      this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
   }
 }
 </script>
@@ -132,7 +139,7 @@ img:not(.profile-pic) {
 }
 
 .feed-card {
-  max-width: 600px;
+  max-width: 500px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   border-radius: 5px;
   padding: 6px 1em;
@@ -148,7 +155,6 @@ img:not(.profile-pic) {
 
 .actions {
   padding-top: .5em;
-  padding-bottom: .25em;
 }
 
 .actions button {
