@@ -9,7 +9,7 @@ import Icon from 'vue-awesome/components/Icon'
 Vue.config.productionTip = false
 Vue.config.devtools = true
 
-axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.baseURL = `${window.location.protocol}:/${window.location.hostname}:3000`;
 
 let token = localStorage.getItem('token');
 if (token)
