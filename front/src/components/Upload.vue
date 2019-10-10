@@ -4,7 +4,7 @@
       <div class="header d-flex flex-ai-center">
         <span class="flex-1">Photo</span>
         <!-- <button>Photo</button> -->
-        <button class="icon-button p-3">
+        <button class="icon-button p-3" @click="$emit('close')">
           <v-icon name="times" />
         </button>
       </div>
@@ -115,7 +115,8 @@ export default {
       hasPreview: false,
       originalPic: null,
       thumbCss: {},
-      text: null
+      localStream: null,
+      text: null,
     };
   },
   methods: {
@@ -226,6 +227,7 @@ export default {
 
     Camera.init()
       .then((stream) => {
+        this.localStream = stream;
         this.previewSrc = this.video.srcObject = stream;
         this.video.addEventListener('loadeddata', () => {
           this.canTakePicture = true;
@@ -236,7 +238,15 @@ export default {
         this.error = "Can't access camera :(";
         console.log(err);
       });
-  }
+  },
+  beforeDestroy() {
+    if (this.previewSrc) {
+      this.video.pause();
+      this.previewSrc.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+  },
 }
 </script>
 

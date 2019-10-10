@@ -1,9 +1,9 @@
 <template>
   <div class="home">
     <!-- <HelloWorld msg="Welcome to Camagru"/> -->
-    <NewPost />
+    <NewPost @upload="showUpload()"/>
     <Feed />
-    <Upload />
+    <Upload v-if="uploading" @close="hideUpload()"/>
   </div>
 </template>
 
@@ -16,11 +16,23 @@ import Upload from '@/components/Upload.vue';
 
 export default {
   name: 'home',
+  data() {
+    return {
+      uploading: false,
+    };
+  },
   components: {
-    // HelloWorld,
     Feed,
     NewPost,
     Upload,
+  },
+  methods: {
+    showUpload() {
+      this.uploading = true;
+    },
+    hideUpload() {
+      this.uploading = false;
+    },
   },
 }
 </script>

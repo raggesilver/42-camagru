@@ -1,7 +1,7 @@
 <template>
   <div v-if="this.user" class="new-post">
     <!-- <img :src="this.user.picture" class="profile-pic big"> -->
-    <button class="icon-button">
+    <button class="icon-button" @click="$emit('upload')">
       <v-icon name="camera" scale="1.5"/>
     </button>
     <hr class="vertical">
