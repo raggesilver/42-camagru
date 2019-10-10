@@ -37,6 +37,7 @@
           <!-- Upload picture button -->
           <button class="icon-button flex-1"
             v-show="!hasPreview"
+            @click="uploadLocal()"
           >
             <div class="d-block">
               <v-icon name="file-upload" />
@@ -92,7 +93,10 @@
             <input type="text" placeholder="Say something about this picture"
               v-model="text">
           </div>
-          <button class="suggested mt-2 ml-auto">Publish</button>
+          <!-- Publish button -->
+          <button class="suggested mt-2 ml-auto" :disabled="uploading">
+            Publish
+          </button>
         </div>
       </div>
     </div>
@@ -114,9 +118,8 @@ export default {
       currentFilter: null,
       hasPreview: false,
       originalPic: null,
-      thumbCss: {},
-      localStream: null,
       text: null,
+      uploading: true,
     };
   },
   methods: {
@@ -135,7 +138,7 @@ export default {
     applyFilter(filter) {
       this.currentFilter = filter;
       if (this.hasPreview)
-        this.realApplyFilter(this.canvas.getContext('2d'));
+        this.realApplyFilter();
     },
     /**
      * takePicture()
@@ -150,35 +153,23 @@ export default {
       this.canvas.width = this.video.videoWidth;
       this.canvas.height = this.video.videoHeight;
 
-      let ctx = this.canvas.getContext('2d');
-      ctx.drawImage(this.video, 0, 0,
-                    this.video.videoWidth,
-                    this.video.videoHeight);
+      this.draw(this.video, this.video.videoWidth, this.video.videoHeight);
 
-      this.hasPreview = true;
-      this.originalPic =
-        ctx.getImageData(0, 0, this.video.videoWidth, this.video.videoHeight);
-      let data = this.canvas.toDataURL('image/png');
-
-      document.querySelectorAll('button.filter').forEach(el => {
-        el.style['background-image'] = `url(${data})`;
-        el.style['filter'] = this.filters;
-      });
-
-      this.realApplyFilter(ctx);
+      this.realApplyFilter();
     },
     /**
-     * realApplyFilter(ctx)
+     * realApplyFilter()
      * - reverts the canvas preview to this.originalPic
      * - applies new current filter then redraws
      */
-    realApplyFilter(ctx) {
+    realApplyFilter() {
+      let ctx = this.canvas.getContext('2d');
       ctx.filter = 'none';
       ctx.putImageData(this.originalPic, 0, 0);
       ctx.filter = this.currentFilter.apply;
       ctx.drawImage(this.canvas, 0, 0,
-                    this.video.videoWidth,
-                    this.video.videoHeight);
+                    this.canvas.width,
+                    this.canvas.height);
     },
     /**
      * downloadPicture()
@@ -197,6 +188,44 @@ export default {
       this.canvas.toBlob((blob) => {
         a.href = URL.createObjectURL(blob);
         a.click();
+      });
+    },
+    draw(source, width, height) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+
+      let ctx = this.canvas.getContext('2d');
+      ctx.drawImage(source, 0, 0, this.canvas.width, this.canvas.height);
+
+      this.hasPreview = true;
+      this.originalPic =
+        ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+      let data = this.canvas.toDataURL('image/png');
+
+      document.querySelectorAll('button.filter').forEach(el => {
+        el.style['background-image'] = `url(${data})`;
+        el.style['filter'] = this.filters;
+      });
+    },
+    /**
+     * uploadLocal() get a file from the client's device
+     */
+    uploadLocal() {
+      let i = document.createElement('input');
+      i.type = 'file';
+      i.accept = 'image/*';
+      i.click();
+      i.addEventListener('change', () => {
+        let reader = new FileReader();
+        reader.onload = () => {
+          let img = new Image();
+          img.onload = () => {
+            this.draw(img, img.width, img.height);
+            this.realApplyFilter();
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(i.files[0]);
       });
     },
   },
