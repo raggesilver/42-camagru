@@ -134,6 +134,8 @@ export default {
      * applyFilter(filter)
      * - saves filter to this.currentFilter
      * - calls realApplyFilter if this.hasPreview
+     *
+     * @param {Object} filter
      */
     applyFilter(filter) {
       this.currentFilter = filter;
@@ -161,15 +163,21 @@ export default {
      * realApplyFilter()
      * - reverts the canvas preview to this.originalPic
      * - applies new current filter then redraws
+     *
+     * TODO: Hack idea: cache applied filters so that they don't need to be
+     * recalculated
      */
     realApplyFilter() {
       let ctx = this.canvas.getContext('2d');
       ctx.filter = 'none';
       ctx.putImageData(this.originalPic, 0, 0);
-      ctx.filter = this.currentFilter.apply;
-      ctx.drawImage(this.canvas, 0, 0,
-                    this.canvas.width,
-                    this.canvas.height);
+      // Hack to prevent redraw if no filter needs to be applied
+      if (this.currentFilter.name != 'none') {
+        ctx.filter = this.currentFilter.apply;
+        ctx.drawImage(this.canvas, 0, 0,
+                      this.canvas.width,
+                      this.canvas.height);
+      }
     },
     /**
      * downloadPicture()
@@ -190,21 +198,47 @@ export default {
         a.click();
       });
     },
+    /**
+     * draw(source, width, height)
+     * - draws on previewCanvas from source with width width and height height
+     * - generates and draws smaller previews for filter buttons
+     *
+     * @param {CanvasImageSource} source
+     * @param {Number} width
+     * @param {Number} height
+     */
     draw(source, width, height) {
       this.canvas.width = width;
       this.canvas.height = height;
 
       let ctx = this.canvas.getContext('2d');
-      ctx.drawImage(source, 0, 0, this.canvas.width, this.canvas.height);
+
+      ctx.drawImage(source,
+        // Source x, y, w, h (from original image)
+        0, 0, width, height,
+        // Dest x, y, w, h (to canvas)
+        0, 0, this.canvas.width, this.canvas.height);
 
       this.hasPreview = true;
       this.originalPic =
         ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-      let data = this.canvas.toDataURL('image/png');
+
+      // Hack: create a smaller off-screen canvas to make thumbnails for filters
+      let offCanvas = document.createElement('canvas');
+      let offCtx = offCanvas.getContext('2d');
+      let ratio = width / height;
+
+      offCanvas.width = 300;
+      offCanvas.height = 300 / ratio;
+
+      offCtx.drawImage(source,
+        0, 0, width, height,
+        0, 0, offCanvas.width, offCanvas.height);
+
+      let data = offCanvas.toDataURL('image/png', 0);
 
       document.querySelectorAll('button.filter').forEach(el => {
         el.style['background-image'] = `url(${data})`;
-        el.style['filter'] = this.filters;
       });
     },
     /**
