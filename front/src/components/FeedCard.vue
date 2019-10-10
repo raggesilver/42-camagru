@@ -11,7 +11,11 @@
       </div>
       <!-- Flex post time -->
       <div class="info">
-        <span class="text-muted" style="font-size: 9pt;">{{ postDate }}</span>
+        <!-- margin-top: 3px fixes alignment issue due to different font sizes
+        -->
+        <span class="text-muted" style="font-size: 9pt; margin-top: 3px;">
+          {{ postDate }}
+        </span>
       </div>
       <button class="icon-button flex-right">
         <v-icon name="ellipsis-v" scale="0.85" />
@@ -73,13 +77,9 @@ export default {
       liked: false,
       comment: null,
       commenting: false,
-      showComment: false
+      showComment: false,
+      postDate: timeSince(new Date(this.$props.post.createdAt)) + ' ago',
     };
-  },
-  computed: {
-    postDate() {
-      return timeSince(new Date(this.$props.post.createdAt));
-    }
   },
   components: {
     Comment,
@@ -103,6 +103,11 @@ export default {
   mounted() {
     this.liked =
       this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
+
+    // Hack to update time
+    setInterval(() => {
+      this.postDate = timeSince(new Date(this.$props.post.createdAt)) + ' ago';
+    }, 100);
   }
 }
 </script>

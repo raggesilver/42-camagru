@@ -1,9 +1,9 @@
 <template>
   <div class="feed">
     <FeedCard v-for="post in posts" :key="post._id" :post="post"/>
-    <div v-if="loading || end" style="margin: 6em 0;">
-      <v-icon v-if="loading" name="circle-notch" spin scale="2"/>
-      <p v-if="end" style="margin: 0;" class="text-muted">
+    <div v-show="loading || end" style="margin: 6em 0;">
+      <v-icon v-show="loading" name="circle-notch" spin scale="2"/>
+      <p v-show="end" style="margin: 0;" class="text-muted">
         Looks like you've reached the end.
         <v-icon name="regular/flag" />
       </p>
@@ -27,23 +27,23 @@ export default {
   components: {
     FeedCard
   },
-  watch: {
-    loading(_new) {
-      if (_new && this.atBottom())
-        this.$nextTick(() => {
-          window.scrollTo(0, document.body.scrollHeight);
-        });
-    },
-    end(_new) {
-      if (_new && this.atBottom())
-        this.$nextTick(() => {
-          window.scrollTo(0, document.body.scrollHeight);
-        });
-    }
-  },
+  // watch: {
+  //   loading(_new) {
+  //     if (_new && this.atBottom())
+  //       this.$nextTick(() => {
+  //         window.scrollTo(0, document.body.scrollHeight);
+  //       });
+  //   },
+  //   end(_new) {
+  //     if (_new && this.atBottom())
+  //       this.$nextTick(() => {
+  //         window.scrollTo(0, document.body.scrollHeight);
+  //       });
+  //   }
+  // },
   methods: {
     atBottom() {
-      return (window.pageYOffset + window.innerHeight) ===
+      return Math.ceil(window.pageYOffset + window.innerHeight) ===
         document.documentElement.offsetHeight;
     },
     onScroll() {
@@ -52,7 +52,7 @@ export default {
     },
     fetchPosts() {
       // Skip if reached end
-      if (this.end)
+      if (this.end || this.loading)
         return ;
 
       this.loading = true;

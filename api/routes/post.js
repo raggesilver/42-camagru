@@ -2,6 +2,7 @@ const router  = require('express').Router();
 const guard   = require('../modules/guard');
 const Post    = require('../models/post');
 const Comment = require('../models/comment');
+const Imgur   = require('../modules/imgur');
 
 const { reqparams, notEmpty } = require('@raggesilver/reqparams');
 
@@ -49,6 +50,31 @@ router.post('/', [ guard, reqparams(postParams) ], async (req, res) => {
   return res.json(post);
 });
 
+router.post('/with_picture', [ guard, reqparams(postParams) ], async (req, res, next) => {
+  try {
+    let r = await Imgur.upload(req.body.media[0]);
+
+    if (r.success) {
+      let post = new Post({
+            user: req.user._id,
+           media: [ r.data.link ],
+            text: req.body.text,
+           likes: [],
+        comments: [],
+      });
+
+      await post.save();
+
+      return res.status(200).json(post);
+    }
+    else {
+      console.log(r.data.error);
+      return res.status(r.status).json({ error: r.data.error });
+    }
+  }
+  catch (e) { console.log(e.status); return res.status(500).json({error:'INTERNAL_ERROR'}); }
+});
+
 router.post('/:id/like', guard, async (req, res, next) => {
   try {
     let post = await Post.findById(req.params.id);
@@ -70,7 +96,7 @@ router.post('/:id/like', guard, async (req, res, next) => {
     else
       return res.status(200).json({});
   }
-  catch (e) { return next(e); }
+  catch (e) { console.log(e); return res.status(500).json({error:'INTERNAL_ERROR'}); }
 });
 
 const commentPostParams = {
@@ -98,12 +124,17 @@ async (req, res) => {
     }
     return res.status(200).json({});
   }
-  catch (e) { return next(e); }
+  catch (e) { console.log(e); return res.status(500).json({error:'INTERNAL_ERROR'}); }
 });
 
-router.use((req, res, next, error) => {
-  console.log(error);
-  return res.status(500).json({ error: 'INTERNAL_ERROR' });
+router.post('/upload', [guard, reqparams({ image: {} })], async (req, res) => {
+  console.log(req.body);
+  return res.status(200).json({});
 });
+
+// router.use((req, res, next, error) => {
+//   console.log(error);
+//   return res.status(500).json({ error: 'INTERNAL_ERROR' });
+// });
 
 module.exports = router;

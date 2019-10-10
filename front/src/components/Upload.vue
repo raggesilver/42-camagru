@@ -10,11 +10,13 @@
       </div>
       <div class="content">
 
-        <video id="previewVideo" v-if="!error" autoplay="true"
+        <div class="error pt-1 pb-1" v-if="error">
+          <span>{{ error }}</span>
+        </div>
+        <video id="previewVideo" autoplay="true"
           :src-object.prop.camel="previewSrc"
           v-show="!hasPreview"
         />
-        <span v-else >{{ error }}</span>
 
         <canvas id="previewCanvas"
           v-show="hasPreview"
@@ -94,8 +96,11 @@
               v-model="text">
           </div>
           <!-- Publish button -->
-          <button class="suggested mt-2 ml-auto" :disabled="uploading">
-            Publish
+          <button class="suggested mt-2 ml-auto" :disabled="uploading"
+            @click="uploadPicture()"
+          >
+            <span v-show="!uploading">Publish</span>
+            <v-icon v-show="uploading" name="circle-notch" spin />
           </button>
         </div>
       </div>
@@ -105,6 +110,7 @@
 
 <script>
 import Camera from "@/modules/camera";
+import axios from 'axios';
 
 export default {
   data() {
@@ -119,7 +125,7 @@ export default {
       hasPreview: false,
       originalPic: null,
       text: null,
-      uploading: true,
+      uploading: false,
     };
   },
   methods: {
@@ -239,6 +245,34 @@ export default {
 
       document.querySelectorAll('button.filter').forEach(el => {
         el.style['background-image'] = `url(${data})`;
+      });
+    },
+    /**
+     * uploadPicture()
+     */
+    uploadPicture() {
+      if (!(this.text.trim() != '' && this.hasPreview))
+        return ;
+
+      this.error = null;
+      this.uploading = true;
+      this.$nextTick(() => {
+        axios.post('/api/post/with_picture', {
+          text: this.text,
+          media: [
+            this.canvas.toDataURL('image/png', 1)
+          ]
+        })
+          .then((data) => {
+            data;
+            // TODO: find a way to add the post in data to the feed
+            this.$emit('close');
+          })
+          .catch((err) => {
+            if (err.response)
+              this.error = err.response.data.error;
+          })
+          .finally(() => this.uploading = false);
       });
     },
     /**
@@ -407,5 +441,12 @@ button.suggested {
   border-radius: 6px;
   border: none;
   box-shadow:0 1px 2px rgba(0, 0, 0, .18);
+}
+
+div.error {
+  color: white;
+  font-weight: bold;
+  font-size: 10pt;
+  background: rgb(219, 59, 33);
 }
 </style>
