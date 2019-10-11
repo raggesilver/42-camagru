@@ -43,7 +43,7 @@ export default {
   // },
   methods: {
     atBottom() {
-      return Math.ceil(window.pageYOffset + window.innerHeight) ===
+      return Math.ceil(window.pageYOffset + window.innerHeight) >=
         document.documentElement.offsetHeight;
     },
     onScroll() {
@@ -73,6 +73,10 @@ export default {
   mounted() {
     // Get initial posts
     this.fetchPosts();
+
+    this.$bus.$on('new-post', (post) => {
+      this.posts.unshift(post);
+    });
 
     window.onscroll = this.onScroll;
   }

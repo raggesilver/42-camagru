@@ -31,6 +31,9 @@
         <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);"
           scale="1" />
         <v-icon v-else name="regular/heart" scale="1" />
+        <span v-if="post.user._id === $store.state.user._id" class="text-muted">
+          {{ likeAmmount }}
+        </span>
       </button>
       <!-- Comment button -->
       <button class="icon-button" @click="onShowNewComment">
@@ -52,7 +55,9 @@
     <!-- NewComment -->
     <form class="new-comment d-flex flex-row vertical-slider"
       :class="{ show: showComment }"
-      @submit="onNewComment">
+      :disabled="commenting"
+      @submit="onNewComment"
+    >
       <input type="text" v-model="comment" class="flex-1"
         placeholder="Write a comment" :disabled="commenting">
       <button class="icon-button" type="submit" :disabled="commenting">
@@ -73,7 +78,6 @@ export default {
   },
   data() {
     return {
-      comments: [],
       liked: false,
       comment: null,
       commenting: false,
@@ -84,17 +88,42 @@ export default {
   components: {
     Comment,
   },
+  computed: {
+    likeAmmount() {
+      return this.$props.post.likes.length;
+    }
+  },
   methods: {
     onLikeClicked() {
       axios.post(`/api/post/${this.$props.post._id}/like`)
         .then(({ data }) => {
           this.liked = !!data.liked;
+          let ind = this.$props.post.likes.indexOf(this.$store.state.user._id);
+          // If liked and user _id not in likes
+          if (this.liked && ind == -1)
+            this.$props.post.likes.push(this.$store.state.user._id);
+          // If not liked and user _id in likes
+          else if (!this.liked && ind != -1)
+            this.$props.post.likes.splice(ind, 1);
         })
         .catch(err => console.log(err));
     },
     onNewComment(e) {
       e.preventDefault();
-      console.log(this.comment);
+      if (this.comment.trim() == '' || this.commenting)
+        return ;
+      this.commenting = true;
+      axios.post(`/api/post/${this.$props.post._id}/comment`, {
+        text: this.comment
+      })
+        .then(({ data }) => {
+          console.log(data);
+          if (data.comment)
+            this.$props.post.comments.push(data.comment);
+          this.comment = null;
+        })
+        .catch((err) => console.log(err))
+        .finally(() => this.commenting = false);
     },
     onShowNewComment() {
       this.showComment = !this.showComment;

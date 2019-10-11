@@ -1,13 +1,6 @@
 <template>
   <div id="app">
-    <!-- <div v-if="this.logged" id="nav">
-      <router-link to="/">Home</router-link>
-      <a href="#" @click="logout">Logout</a>
-    </div>
-    <div v-else id="nav">
-      <router-link to="/about">About</router-link>
-      <router-link to="/login">Login</router-link>
-    </div> -->
+    <NewPost />
 
     <!-- Make the content only be loaded once the user's data is fetched -->
     <router-view v-if="(this.logged && this.user) || !(this.logged)"/>
@@ -20,10 +13,14 @@
 
 <script>
 import { mapState } from 'vuex';
+import NewPost from '@/components/NewPost.vue';
 
 export default {
   computed: {
     ...mapState(['logged', 'user'])
+  },
+  components: {
+    NewPost,
   },
   methods: {
     doLogout() {
@@ -31,11 +28,11 @@ export default {
         .dispatch('logout')
         .then(() => this.$router.push('/about'));
     },
-    logout(e) {
-      e.preventDefault();
-      if (window.confirm('Do you really want to logout?'))
-        this.doLogout();
-    },
+    // logout(e) {
+    //   e.preventDefault();
+    //   if (window.confirm('Do you really want to logout?'))
+    //     this.doLogout();
+    // },
     fetchUser() {
       this.$store.dispatch('getUser')
         // FIXME: remove console.log
@@ -120,6 +117,16 @@ button.icon-button:not(:disabled) {
 button.icon:disabled,
 button.icon-button:disabled {
   opacity: .4;
+}
+
+button.suggested {
+  padding: .75em 1.5em;
+  background: #42b983;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  box-shadow:0 1px 2px rgba(0, 0, 0, .18);
 }
 
 .flex-right {
@@ -239,6 +246,14 @@ button.icon-button:disabled {
 .mt-4 { margin-top: 1.5em !important; }
 .mt-5 { margin-top: 2em !important; }
 .mt-auto { margin-top: auto !important; }
+
+.input {
+  width: 100%;
+  border: none;
+  padding: 1em;
+  border-radius: 5px;
+  box-shadow:0 2px 4px rgba(0, 0, 0, .18);
+}
 </style>
 
 <style scoped>

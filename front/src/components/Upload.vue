@@ -4,11 +4,13 @@
       <div class="header d-flex flex-ai-center">
         <span class="flex-1">Photo</span>
         <!-- <button>Photo</button> -->
-        <button class="icon-button p-3" @click="$emit('close')">
+        <button class="icon-button p-3"
+          @click="close"
+        >
           <v-icon name="times" />
         </button>
       </div>
-      <div class="content">
+      <div class="content pb-2">
 
         <div class="error pt-1 pb-1" v-if="error">
           <span>{{ error }}</span>
@@ -93,15 +95,18 @@
           <!-- <span>Post</span> -->
           <div>
             <input type="text" placeholder="Say something about this picture"
-              v-model="text">
+              v-model="text" class="input">
           </div>
           <!-- Publish button -->
-          <button class="suggested mt-2 ml-auto" :disabled="uploading"
+          <!-- <button class="suggested mt-2 ml-auto" :disabled="uploading"
             @click="uploadPicture()"
           >
             <span v-show="!uploading">Publish</span>
             <v-icon v-show="uploading" name="circle-notch" spin />
-          </button>
+          </button> -->
+          <AsyncButton :fn="uploadPicture" class="suggested mt-2 ml-auto">
+            Publish now
+          </AsyncButton>
         </div>
       </div>
     </div>
@@ -111,6 +116,7 @@
 <script>
 import Camera from "@/modules/camera";
 import axios from 'axios';
+import AsyncButton from '@/components/AsyncButton.vue';
 
 export default {
   data() {
@@ -124,16 +130,27 @@ export default {
       currentFilter: null,
       hasPreview: false,
       originalPic: null,
+      originalMime: null,
       text: null,
       uploading: false,
     };
   },
+  components: {
+    AsyncButton
+  },
   methods: {
+    /**
+     * close()
+     */
+    close() {
+      this.$store.commit('setShowUpload', false);
+    },
     /**
      * discardPicture()
      */
     discardPicture() {
       this.originalPic = null;
+      this.originalMime = null;
       this.hasPreview = false;
     },
     /**
@@ -161,6 +178,7 @@ export default {
       this.canvas.width = this.video.videoWidth;
       this.canvas.height = this.video.videoHeight;
 
+      this.originalMime = null;
       this.draw(this.video, this.video.videoWidth, this.video.videoHeight);
 
       this.realApplyFilter();
@@ -241,39 +259,49 @@ export default {
         0, 0, width, height,
         0, 0, offCanvas.width, offCanvas.height);
 
-      let data = offCanvas.toDataURL('image/png', 0);
+      let data = offCanvas.toDataURL(this.originalMime || 'image/png', 0.7);
 
       document.querySelectorAll('button.filter').forEach(el => {
         el.style['background-image'] = `url(${data})`;
       });
     },
     /**
-     * uploadPicture()
+     * async uploadPicture()
      */
-    uploadPicture() {
-      if (!(this.text.trim() != '' && this.hasPreview))
+    async uploadPicture() {
+      if (!(this.text && this.text.trim() != '' && this.hasPreview))
         return ;
 
       this.error = null;
       this.uploading = true;
-      this.$nextTick(() => {
-        axios.post('/api/post/with_picture', {
+
+      try {
+        const payload = {
           text: this.text,
           media: [
-            this.canvas.toDataURL('image/png', 1)
+            this.canvas.toDataURL(this.originalMime || 'image/png', 0.9)
           ]
-        })
-          .then((data) => {
-            data;
-            // TODO: find a way to add the post in data to the feed
-            this.$emit('close');
-          })
-          .catch((err) => {
-            if (err.response)
-              this.error = err.response.data.error;
-          })
-          .finally(() => this.uploading = false);
-      });
+        };
+        // Don't actually know what the limit is, but it's under 20Mb
+        if (payload.media[0].length / 1000000 > 20) {
+          this.error = 'File is over the size limit';
+          return ;
+        }
+        let { data } = await axios.post('/api/post/with_picture', payload);
+        // TODO: find a way to add the post in data to the feed
+        data.user = {
+          _id: this.$store.state.user._id,
+          username: this.$store.state.user.username,
+          picture: this.$store.state.user.picture,
+        };
+        this.$bus.$emit('new-post', data);
+        this.close();
+      }
+      catch(err) {
+        if (err.response)
+          this.error = err.response.data.error;
+      }
+      finally { this.uploading = false }
     },
     /**
      * uploadLocal() get a file from the client's device
@@ -293,6 +321,7 @@ export default {
           };
           img.src = reader.result;
         };
+        this.originalMime = i.files[0].type;
         reader.readAsDataURL(i.files[0]);
       });
     },
@@ -324,11 +353,12 @@ export default {
 
     Camera.init()
       .then((stream) => {
-        this.localStream = stream;
         this.previewSrc = this.video.srcObject = stream;
+        // Wait for first frame to be drawn to enable taking pictures
         this.video.addEventListener('loadeddata', () => {
           this.canTakePicture = true;
         });
+        // Start the video (maybe unecessary since autoplay="true"?)
         this.video.play();
       })
       .catch((err) => {
@@ -337,6 +367,7 @@ export default {
       });
   },
   beforeDestroy() {
+    // Stop using webcam once the component is destroyed (on $emit('close'))
     if (this.previewSrc) {
       this.video.pause();
       this.previewSrc.getTracks().forEach((track) => {
@@ -423,24 +454,6 @@ button.filter canvas {
 
 .hidden {
   display: none;
-}
-
-input {
-  width: 100%;
-  border: none;
-  padding: 1em;
-  border-radius: 5px;
-  box-shadow:0 2px 4px rgba(0, 0, 0, .18);
-}
-
-button.suggested {
-  padding: .75em 1.5em;
-  background: #42b983;
-  color: white;
-  font-weight: bold;
-  border-radius: 6px;
-  border: none;
-  box-shadow:0 1px 2px rgba(0, 0, 0, .18);
 }
 
 div.error {

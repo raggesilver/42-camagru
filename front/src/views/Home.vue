@@ -1,9 +1,9 @@
 <template>
-  <div class="home">
+  <div v-if="user" class="home">
     <!-- <HelloWorld msg="Welcome to Camagru"/> -->
-    <NewPost @upload="showUpload()"/>
+    <!-- <NewPost @upload="showUpload()"/> -->
     <Feed />
-    <Upload v-if="uploading" @close="hideUpload()"/>
+    <Upload v-if="showUpload" />
   </div>
 </template>
 
@@ -11,8 +11,8 @@
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue';
 import Feed from '@/components/Feed.vue';
-import NewPost from '@/components/NewPost.vue';
 import Upload from '@/components/Upload.vue';
+import { mapState } from 'vuex';
 
 export default {
   name: 'home',
@@ -23,16 +23,10 @@ export default {
   },
   components: {
     Feed,
-    NewPost,
     Upload,
   },
-  methods: {
-    showUpload() {
-      this.uploading = true;
-    },
-    hideUpload() {
-      this.uploading = false;
-    },
+  computed: {
+    ...mapState(['showUpload', 'user'])
   },
 }
 </script>

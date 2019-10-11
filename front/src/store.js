@@ -13,6 +13,7 @@ export default new Vuex.Store({
       if (d) return JSON.parse(d);
       return null;
     })(),
+    showUpload: false,
   },
   mutations: {
     setToken: (state, data) => {
@@ -26,6 +27,9 @@ export default new Vuex.Store({
       state.token = null;
       state.user = null;
       state.logged = false;
+    },
+    setShowUpload(state, data) {
+      state.showUpload = !!data;
     }
   },
   actions: {
