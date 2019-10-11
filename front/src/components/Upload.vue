@@ -12,9 +12,8 @@
       </div>
       <div class="content pb-2">
 
-        <div class="error pt-1 pb-1" v-if="error">
-          <span>{{ error }}</span>
-        </div>
+        <Error v-if="error" :error="error" @dismiss="() => error = null"/>
+
         <video id="previewVideo" autoplay="true"
           :src-object.prop.camel="previewSrc"
           v-show="!hasPreview"
@@ -98,12 +97,6 @@
               v-model="text" class="input">
           </div>
           <!-- Publish button -->
-          <!-- <button class="suggested mt-2 ml-auto" :disabled="uploading"
-            @click="uploadPicture()"
-          >
-            <span v-show="!uploading">Publish</span>
-            <v-icon v-show="uploading" name="circle-notch" spin />
-          </button> -->
           <AsyncButton :fn="uploadPicture" class="suggested mt-2 ml-auto">
             Publish now
           </AsyncButton>
@@ -117,6 +110,7 @@
 import Camera from "@/modules/camera";
 import axios from 'axios';
 import AsyncButton from '@/components/AsyncButton.vue';
+import Error from '@/components/Error.vue';
 
 export default {
   data() {
@@ -136,7 +130,8 @@ export default {
     };
   },
   components: {
-    AsyncButton
+    AsyncButton,
+    Error,
   },
   methods: {
     /**
@@ -300,6 +295,9 @@ export default {
       catch(err) {
         if (err.response)
           this.error = err.response.data.error;
+        else {
+          this.error = 'Network error.';
+        }
       }
       finally { this.uploading = false }
     },
