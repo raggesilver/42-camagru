@@ -237,10 +237,14 @@ export default {
       let name = `camagru-pic-${Date.now()}.png`;
 
       a.download = name;
-      this.canvas.toBlob((blob) => {
-        a.href = URL.createObjectURL(blob);
-        a.click();
-      });
+
+      this.getFinalPicture()
+        .then((canvas) => {
+          canvas.toBlob((blob) => {
+            a.href = URL.createObjectURL(blob);
+            a.click();
+          });
+        });
     },
     /**
      * draw(source, width, height)
@@ -286,6 +290,36 @@ export default {
       });
     },
     /**
+     * getFinalPicture()
+     * - get the mix of canvas + stickers as one
+     * @returns {Promise<Canvas>}
+     */
+    getFinalPicture() {
+      return new Promise((resolve) => {
+        let c = document.createElement('canvas');
+        let ctx = c.getContext('2d');
+
+        c.width = this.canvas.width;
+        c.height = this.canvas.height;
+        ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height);
+
+        let rect = this.cc.getBoundingClientRect();
+        let rx = this.canvas.width / rect.width;
+        let ry = this.canvas.height / rect.height;
+
+        let floats = document.querySelectorAll(`.floating-sticker`);
+        floats.forEach((el) => {
+          ctx.drawImage(el,
+            0, 0,
+            el.naturalWidth, el.naturalHeight,
+            el.offsetLeft * rx, el.offsetTop * ry,
+            50 * rx, 50 * ry);
+        });
+
+        return resolve(c);
+      });
+    },
+    /**
      * async uploadPicture()
      */
     async uploadPicture() {
@@ -299,7 +333,7 @@ export default {
         const payload = {
           text: this.text,
           media: [
-            this.canvas.toDataURL(this.originalMime || 'image/png', 0.9)
+            (await this.getFinalPicture()).toDataURL(this.originalMime || 'image/png', 0.9)
           ]
         };
         // Don't actually know what the limit is, but it's under 20Mb
