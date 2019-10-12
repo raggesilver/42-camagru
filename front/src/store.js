@@ -4,6 +4,27 @@ import axios from 'axios';
 
 Vue.use(Vuex);
 
+function signFunction(context, url, data) {
+  return new Promise((resolve, reject) => {
+    axios.post(url, data)
+      .then(res => {
+        const token = res.data.token;
+        const user  = res.data.user;
+
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        context.commit('setToken', token);
+        context.commit('setUser', user);
+
+        return resolve(res);
+      })
+      .catch(err => reject(err));
+  });
+}
+
 export default new Vuex.Store({
   state: {
     logged: !!localStorage.getItem('token'),
@@ -34,23 +55,10 @@ export default new Vuex.Store({
   },
   actions: {
     login(context, data) {
-      return new Promise((resolve, reject) => {
-        axios.post('/api/auth/login', data)
-          .then(res => {
-            const token = res.data.token;
-            const user  = res.data.user;
-
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-
-            localStorage.setItem('token', token);
-
-            context.commit('setToken', token);
-            context.commit('setUser', user);
-
-            return resolve(res);
-          })
-          .catch(err => reject(err));
-      });
+      return signFunction(context, '/api/auth/login', data);
+    },
+    register(context, data) {
+      return signFunction(context, '/api/auth/register', data);
     },
     logout(context) {
       return new Promise((resolve) => {

@@ -31,7 +31,7 @@ div.error {
 }
 
 div.error.round {
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 button.close-button {

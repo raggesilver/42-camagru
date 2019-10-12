@@ -19,9 +19,12 @@
           v-show="!hasPreview"
         />
 
-        <canvas id="previewCanvas"
-          v-show="hasPreview"
-        />
+        <div class="canvas-container d-flex">
+          <canvas id="previewCanvas" v-show="hasPreview"/>
+          <img v-for="(sticker, i) in stickers" :key="i"
+            :data-sticker-id="i" :alt="sticker.name"
+            :src="sticker.pic" class="floating-sticker"/>
+        </div>
 
         <div class="d-flex flex-ai-center p-3">
           <!-- Take picture button -->
@@ -76,8 +79,9 @@
         </div>
 
         <!-- Filter selection -->
-        <div v-show="hasPreview" class="d-flex flex-jc-center p-3"
-          style="align-items: flex-start; overflow-y: auto;">
+        <div v-show="hasPreview" class="d-flex flex-jc-center mt-1 mb-1 pb-2 pt-2"
+          style="align-items: flex-start; overflow-y: auto; flex-wrap: wrap;">
+          <span style="flex: 0 0 100%;" class="mb-1 mt-1">Filters</span>
           <div v-for="filter of filters" :key="filter.name">
             <button class="filter ml-1 mr-1"
               :style="{ ...(filter.css || {}), filter: filter.apply }"
@@ -89,8 +93,21 @@
           </div>
         </div>
 
+        <!-- Sticker section -->
+        <div v-show="hasPreview" class="d-flex flex-jc-center mt-1 mb-1 pb-2 pt-2"
+          style="align-items: flex-start; overflow-y: auto; flex-wrap: wrap;">
+          <span style="flex: 0 0 100%;" class="mb-1 mt-1">Stickers</span>
+          <button class="sticker" v-for="sticker of stickerList"
+            :key="sticker.name"
+            :style="{ 'background-image': `url(${sticker.pic})` }"
+            @click="e => onInsertSticker(e, sticker)"
+          >
+            <!-- {{ sticker.name }} -->
+          </button>
+        </div>
+
         <!-- Publish section -->
-        <div v-show="hasPreview" class="publish d-flex flex-col pl-2 pr-2">
+        <div v-show="hasPreview" class="publish d-flex flex-col pl-2 pr-2 mb-2">
           <!-- <span>Post</span> -->
           <div>
             <input type="text" placeholder="Say something about this picture"
@@ -111,22 +128,26 @@ import Camera from "@/modules/camera";
 import axios from 'axios';
 import AsyncButton from '@/components/AsyncButton.vue';
 import Error from '@/components/Error.vue';
+import stickerList from '@/modules/stickerlist';
 
 export default {
   data() {
     return {
-      previewSrc: null,
       canTakePicture: false,
-      error: null,
       canvas: null,
-      video: null,
-      filters: [],
+      cc: null,
       currentFilter: null,
+      error: null,
+      filters: [],
       hasPreview: false,
-      originalPic: null,
       originalMime: null,
+      originalPic: null,
+      previewSrc: null,
+      stickerList,
+      stickers: [],
       text: null,
       uploading: false,
+      video: null,
     };
   },
   components: {
@@ -134,6 +155,9 @@ export default {
     Error,
   },
   methods: {
+    onInsertSticker(e, sticker) {
+      this.stickers.push(sticker);
+    },
     /**
      * close()
      */
@@ -147,6 +171,7 @@ export default {
       this.originalPic = null;
       this.originalMime = null;
       this.hasPreview = false;
+      this.stickers = [];
     },
     /**
      * applyFilter(filter)
@@ -363,6 +388,67 @@ export default {
         this.error = "Can't access camera :(";
         console.log(err);
       });
+
+    this.cc = document.querySelector('div.canvas-container');
+    let target = null;
+    let click = { sx: null, sy: null, cx: null, cy: null };
+
+    const onMouseUp = (e) => {
+      e.preventDefault();
+      target.classList.remove('moving');
+
+      // Remove listeners
+      document.onmousemove = null;
+      document.onmouseup = null;
+    };
+
+    const onMouseMove = (e) => {
+      e.preventDefault();
+
+      click.cx = click.sx - e.clientX;
+      click.cy = click.sy - e.clientY;
+      click.sx = e.clientX;
+      click.sy = e.clientY;
+
+      let b = this.cc.getBoundingClientRect();
+
+      target.style.left = `${
+        Math.min(
+          Math.max(e.clientX - 25 - b.left, 0),
+          b.width - 50
+        )
+      }px`;
+
+      target.style.top = `${
+        Math.min(
+          Math.max(e.clientY - 25 - b.top, 0),
+          b.height - 50
+        )
+      }px`;
+    };
+
+    this.cc.addEventListener('mousedown', (e) => {
+      if (!e.target) return ;
+
+      if (e.target.classList.contains('floating-sticker')) {
+        e.preventDefault();
+        target = e.target;
+        target.classList.add('moving');
+        // Click start
+        click.sx = e.clientX;
+        click.sy = e.clientY;
+        document.onmousemove = onMouseMove;
+        document.onmouseup = onMouseUp;
+      }
+    });
+
+    // this.cc.addEventListener('click', (e) => {
+    //   if (!e.target) return ;
+
+    //   if (e.target.classList.contains('floating-sticker')) {
+    //     this.stickers.splice(e.target.id.split('-'))
+    //   }
+    // });
   },
   beforeDestroy() {
     // Stop using webcam once the component is destroyed (on $emit('close'))
@@ -454,10 +540,35 @@ button.filter canvas {
   display: none;
 }
 
-div.error {
-  color: white;
-  font-weight: bold;
-  font-size: 10pt;
-  background: rgb(219, 59, 33);
+button.sticker {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  border: 2px solid transparent;
+  margin: 5px;
+}
+
+button.sticker.active {
+  border-color: #42b4b9;
+}
+
+div.canvas-container {
+  position: relative;
+}
+
+div.canvas-container .floating-sticker {
+  position: absolute;
+  left: calc(50% - 25px);
+  top: calc(50% - 25px);
+  width: 50px;
+  height: 50px;
+}
+
+div.canvas-container .floating-sticker.moving {
+  cursor: move;
 }
 </style>

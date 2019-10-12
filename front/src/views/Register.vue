@@ -1,38 +1,47 @@
 <template>
   <div class="d-flex flex-col login ml-auto mr-auto">
 
-    <h1>Sign in</h1>
+    <h1>Sign up</h1>
 
-    <Error v-if="errorMessage" :error="errorMessage" :round="true"
-      @dismiss="() => this.errorMessage = null"/>
+    <Error v-if="error" :error="error" :round="true"
+      @dismiss="() => this.error = null"/>
 
     <form @submit="onSubmit">
+
+      <img :src="profilePicture" class="profile-pic large d-block ml-auto mr-auto" />
+
+      <button class="secondary">Change picture</button>
+
       <div class="input-group flex-1 mt-1">
         <input type="email" id="emailInput" v-model="email" class="input" placeholder="Email">
+      </div>
+
+      <div class="input-group flex-1 mt-1">
+        <input type="text" id="usernameInput" v-model="username" class="input" placeholder="Username">
       </div>
 
       <div class="input-group flex-1 mt-1">
         <input type="password" id="passwordInput" v-model="password" class="input" placeholder="Password">
       </div>
 
+      <div class="input-group flex-1 mt-1">
+        <input type="password" id="password2Input" v-model="password2" class="input" placeholder="Confirm password">
+      </div>
+
       <AsyncButton type="submit" class="suggested mt-5 pl-5 pr-5"
         :fn="onSubmit"
       >
-        Sign in
+        Sign up
       </AsyncButton>
 
-      <small class="d-block mt-3 text-muted">
-        Don't have an account?
-        <router-link to="/register">Sign up!</router-link>
-      </small>
-
-      <small class="d-block mt-1">
-        <a href="#" class="secondary" @click="onForgotPass">Forgot password</a>
+      <small class="d-block mt-3">
+        Already have an account?
+        <router-link to="/login" class="secondary">Sign in!</router-link>
       </small>
     </form>
 
-    <!-- <div class="errors" v-if="errorMessage">
-      {{ errorMessage }}
+    <!-- <div class="errors" v-if="error">
+      {{ error }}
     </div> -->
   </div>
 </template>
@@ -45,9 +54,12 @@ export default {
   data() {
     return {
       email: null,
+      username: null,
       password: null,
-      errorMessage: null,
-      loading: false
+      password2: null,
+      error: null,
+      loading: false,
+      profilePicture: 'https://imgur.com/IqlHUiV.png',
     };
   },
   components: {
@@ -58,10 +70,14 @@ export default {
     async onSubmit(e) {
       // Prevent form submit
       e.preventDefault();
-      if (!(this.email && this.password))
+      if (!(this.email && this.password && this.username && this.password2))
         return ;
+      if (this.password !== this.password2) {
+        this.error = "Passwords don't match.";
+        return ;
+      }
       // Reset error message
-      this.errorMessage = null;
+      this.error = null;
 
       try {
         await this.$store
@@ -70,7 +86,7 @@ export default {
       }
       catch(err) {
         if (err.response && err.response.data.error)
-          this.errorMessage = err.response.data.error;
+          this.error = err.response.data.error;
       }
     },
     onForgotPass(e) {

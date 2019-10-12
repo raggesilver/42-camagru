@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <NewPost />
-
     <!-- Make the content only be loaded once the user's data is fetched -->
     <router-view v-if="(this.logged && this.user) || !(this.logged)"/>
     <div v-else class="loader text-muted">
@@ -85,6 +84,8 @@ a:visited {
   color: #42b983;
 }
 
+a.secondary { text-decoration: none; }
+
 .profile-pic {
   width: 40px;
   height: 40px;
@@ -98,6 +99,13 @@ a:visited {
 .profile-pic.small { width: 30px; height: 30px }
 .profile-pic.tiny { width: 20px; height: 20px }
 
+button {
+  padding: .75em 1.5em;
+  border-radius: 6px;
+  border: none;
+  box-shadow:0 1px 2px rgba(0, 0, 0, .18);
+}
+
 button.icon,
 button.icon-button {
   background: transparent;
@@ -107,6 +115,7 @@ button.icon-button {
   text-align: center;
   line-height: 50%;
   color: #2c3e50;
+  box-shadow: none;
 }
 
 button.icon:not(:disabled),
@@ -120,13 +129,27 @@ button.icon-button:disabled {
 }
 
 button.suggested {
-  padding: .75em 1.5em;
   background: #42b983;
   color: white;
   font-weight: bold;
-  border-radius: 6px;
-  border: none;
-  box-shadow:0 1px 2px rgba(0, 0, 0, .18);
+}
+
+button.secondary {
+  padding: .75em 1.5em;
+  background: transparent;
+  border: 2px solid rgb(66, 180, 185);
+  color: #42b4b9;
+  font-weight: bold;
+}
+
+button.suggested:not(:disabled):hover,
+button.secondary:not(:disabled):hover {
+  filter: brightness(.95);
+}
+
+button.suggested:not(:disabled):active,
+button.secondary:not(:disabled):active {
+  filter: brightness(.85);
 }
 
 .flex-right {

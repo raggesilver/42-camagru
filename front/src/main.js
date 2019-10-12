@@ -12,6 +12,16 @@ Vue.config.devtools = true
 axios.defaults.baseURL =
   `${window.location.protocol}//${window.location.hostname}:3000`;
 
+axios.interceptors.response.use(null, (err) => {
+  if (!err.response) {
+    let e = { ...err };
+    e.response = { data: { error: 'Network Error' } };
+    return Promise.reject(e);
+  }
+  else
+    return Promise.reject(err);
+});
+
 let token = localStorage.getItem('token');
 if (token)
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
