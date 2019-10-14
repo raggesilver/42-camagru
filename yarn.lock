@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@raggesilver/reqparams@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@raggesilver/reqparams/-/reqparams-1.2.0.tgz#f116d9da938b30e16ab55c7205ef4e17634ed94b"
-  integrity sha512-mTfc0NUZlR5h1ywrA4ElV8umRQkWIUFBSkYP3olfTtHzgokHe6gFn53AjlV5UruztUwLQaadS4v4jnuxyc5myA==
+"@raggesilver/reqparams@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@raggesilver/reqparams/-/reqparams-1.2.1.tgz#6d6350c06fce341876ce1ba4722be0d396a63f5a"
+  integrity sha512-BswQv5l5XtTAmZLRmiarQgKwya06nHzr+2fp8dDFyUxJ3pk/jesc7neshoExMEcbSv5VCEJIB25jTutnX/Bh4g==
 
 "@types/babel-types@*", "@types/babel-types@^7.0.0":
   version "7.0.7"
