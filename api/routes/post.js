@@ -99,7 +99,10 @@ router.post('/:id/like', guard, async (req, res) => {
     else
       return res.status(404).json({ error: 'Post does not exist.' });
   }
-  catch (e) { console.log(e); return res.status(500).json({error:'INTERNAL_ERROR'}); }
+  catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
+  }
 });
 
 const commentPostParams = {
@@ -125,19 +128,9 @@ router.post('/:id/comment', commentPostMid, async (req, res) => {
       // Then push it to the post's comments
       post.comments.push(comment._id);
       await post.save();
-      comment.user = { _id: req.user._id, picture: req.user.picture };
-      const com = {
-        _id: comment._id,
-        text: comment.text,
-        user: {
-          _id: req.user._id,
-          picture: req.user.picture,
-          username: req.user.username
-        },
-        createdAt: comment.createdAt,
-        updatedAt: comment.updatedAt
-      };
-      return res.status(200).json({ comment: com });
+      // Populate comment.user for the response
+      await comment.populate('user', 'username picture').execPopulate();
+      return res.status(200).json({ comment });
     }
     return res.status(404).json({ error: 'Post does not exist.' });
   }
@@ -153,9 +146,22 @@ const uploadPostMid = [
   reqparams({ image: {} })
 ];
 
-router.post('/upload', uploadPostMid, async (req, res) => {
-  console.log(req.body);
-  return res.status(200).json({});
+router.post('/upload_image', uploadPostMid, async (req, res) => {
+  try {
+    let r = await Imgur.upload(req.body.media[0]);
+    if (r.success) {
+      return res.status(200).json({ link: r.data.link });
+    }
+    else {
+      console.log(r.data.error);
+      return res.status(r.status).json({ error: r.data.error });
+    }
+  }
+  catch(e) {
+    // e.status because e is most likely imgur's API response, and it is huge
+    console.log(e.status ? `Imgur status ${e.status}` : e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
+  }
 });
 
 // router.use((req, res, next, error) => {

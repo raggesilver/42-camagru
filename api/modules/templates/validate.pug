@@ -8,4 +8,4 @@ html(lang="en")
   body
     | You need to validate you email before you can use your account
     br
-    a(href="http://#{app_url}/validate/#{code}") http://#{app_url}/validate/#{code}
+    a(href=`http://${app_url}/validate?tok=${code}`) http://#{app_url}/validate?tok=#{code}

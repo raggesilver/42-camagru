@@ -16,6 +16,13 @@ import FeedCard from '@/components/FeedCard.vue';
 import axios from 'axios';
 
 export default {
+  props: {
+    source: {
+      type: Array,
+      required: false,
+      default: null
+    },
+  },
   data() {
     return {
       posts: [],
@@ -71,14 +78,20 @@ export default {
     }
   },
   mounted() {
-    // Get initial posts
-    this.fetchPosts();
+    // If there is a source we don't need to connect anything
+    if (this.$props.source) {
+      this.posts = this.$props.source;
+    }
+    else {
+      // Get initial posts
+      this.fetchPosts();
 
-    this.$bus.$on('new-post', (post) => {
-      this.posts.unshift(post);
-    });
+      this.$bus.$on('new-post', (post) => {
+        this.posts.unshift(post);
+      });
 
-    window.onscroll = this.onScroll;
+      window.onscroll = this.onScroll;
+    }
   }
 }
 </script>

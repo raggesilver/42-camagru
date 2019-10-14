@@ -4,7 +4,7 @@
       <!-- <img :src="this.user.picture" class="profile-pic big"> -->
       <button v-if="logged"
         class="icon-button"
-        @click="$store.commit('setShowUpload', true)"
+        @click="showUpload"
       >
         <v-icon name="camera" scale="1.5" class="fa-fw"/>
       </button>
@@ -12,12 +12,18 @@
       <router-link to="/" style="font-size: 14pt" class="logo">
         <img src="../assets/logo.png" style="height: 30px">
       </router-link>
-      <button v-if="logged" class="icon-button ml-auto"
+      <div class="ml-auto mr-auto sep"></div>
+      <button v-if="logged" class="icon-button"
+        @click="() => $router.push('/profile/me').catch(() => {})"
+      >
+        <v-icon name="user" class="fa-fw"/>
+      </button>
+      <button v-if="logged" class="icon-button"
         @click="logout"
       >
         <v-icon name="sign-out-alt" class="fa-fw"/>
       </button>
-      <button v-else class="icon-button ml-auto d-flex flex-ai-center"
+      <button v-else class="icon-button d-flex flex-ai-center"
         @click="$router.push('/login')"
       >
         <v-icon name="sign-in-alt" class="fa-fw"/>
@@ -44,6 +50,11 @@ export default {
       e.preventDefault();
       if (window.confirm('Do you really want to logout?'))
         this.doLogout();
+    },
+    showUpload() {
+      this.$store.commit('setShowUpload', true);
+      if (this.$route.path != '/')
+        this.$router.push('/').catch(() => {});
     },
   }
 }

@@ -64,9 +64,12 @@ export default {
       this.errorMessage = null;
 
       try {
-        await this.$store
+        let res = await this.$store
           .dispatch('login', { email: this.email, password: this.password });
-        this.$router.push('/');
+        if (res.data.user.verified)
+          this.$router.push('/');
+        else
+          this.$router.push('/validate');
       }
       catch(err) {
         if (err.response && err.response.data.error)

@@ -5,12 +5,6 @@ import store from './store'
 
 Vue.use(Router)
 
-function guard(to, from, next) {
-  if (store.state.logged)
-    return next();
-  next('/about');
-}
-
 const router = new Router({
   mode: 'history',
   base: process.env.APP_URL,
@@ -19,7 +13,9 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: Home,
-      beforeEnter: guard
+      meta: {
+        requiresAuth: true
+      },
     },
     {
       path: '/login',
@@ -40,9 +36,20 @@ const router = new Router({
       component: () => import('./views/About.vue')
     },
     {
-      path: '/validate/:tok',
+      path: '/validate',
       name: 'validate',
-      component: () => import('./views/Validate.vue')
+      component: () => import('./views/Validate.vue'),
+      meta: {
+        requiresAuth: true
+      },
+    },
+    {
+      path: '/profile/:username',
+      name: 'profile',
+      component: () => import('./views/Profile.vue'),
+      meta: {
+        requiresAuth: true
+      },
     },
     {
       path: '*',
@@ -50,6 +57,30 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/404.vue')
     }
   ]
+});
+
+router.beforeEach((to, from, next) => {
+  // Check unverified accounts
+  if (store.state.logged && store.state.user &&
+      !store.state.user.verified && to.path != '/validate') {
+    // Logged into unverified account at any route
+    console.log('Redirecting to validate');
+    console.log(store.state.logged, store.state.user, !store.state.user.verified, to.path != '/validate');
+    next('/validate');
+  }
+  // Guarded route
+  else if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // Logged
+    if (store.state.logged) {
+      next();
+    }
+    // Not logged in protected route
+    else {
+      next('/about');
+    }
+  }
+  else
+    next();
 });
 
 export default router;

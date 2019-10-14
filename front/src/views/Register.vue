@@ -80,8 +80,13 @@ export default {
       this.error = null;
 
       try {
-        await this.$store
-          .dispatch('login', { email: this.email, password: this.password });
+        let payload = {
+             email: this.email,
+          password: this.password,
+          username: this.username,
+           picture: this.picture,
+        };
+        await this.$store.dispatch('register', payload);
         this.$router.push('/');
       }
       catch(err) {

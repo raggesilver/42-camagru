@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <NewPost />
+    <Error v-if="error" :error="error" @dismiss="() => error = null" />
     <!-- Make the content only be loaded once the user's data is fetched -->
     <router-view v-if="(this.logged && this.user) || !(this.logged)"/>
     <div v-else class="loader text-muted">
       <v-icon name="circle-notch" spin scale="1.5" />
-      <!-- <span>Loading user data</span> -->
     </div>
   </div>
 </template>
@@ -13,13 +13,20 @@
 <script>
 import { mapState } from 'vuex';
 import NewPost from '@/components/NewPost.vue';
+import Error from '@/components/Error.vue';
 
 export default {
+  data() {
+    return {
+      error: null,
+    };
+  },
   computed: {
-    ...mapState(['logged', 'user'])
+    ...mapState(['logged', 'user', 'showUpload'])
   },
   components: {
     NewPost,
+    Error,
   },
   methods: {
     doLogout() {
@@ -27,26 +34,36 @@ export default {
         .dispatch('logout')
         .then(() => this.$router.push('/about'));
     },
-    // logout(e) {
-    //   e.preventDefault();
-    //   if (window.confirm('Do you really want to logout?'))
-    //     this.doLogout();
-    // },
     fetchUser() {
       this.$store.dispatch('getUser')
         // FIXME: remove console.log
-        .then(() => console.log('User updated, cache overwritten.'))
+        .then((user) => {
+          console.log('User updated, cache overwritten.');
+          if (!user.verified && this.$route.path != '/validate')
+            return this.$router.replace('/validate');
+        })
         .catch((err) => {
-          if (err.response && err.response.status == 401)
-            this.doLogout();
+          if (err.response) {
+            if (err.response.status == 401)
+              this.doLogout();
+            else
+              this.error = err.response.data.error;
+          }
           else
             console.log(err);
         });
     }
   },
   mounted() {
-    if (this.logged)
+    if (this.logged) {
+      /**
+       * If the user is not verified invalidate it and let fecthUser handle the
+       * rest.
+       */
+      if (this.user && !this.user.verified)
+        this.$store.commit('setUser', null);
       this.fetchUser();
+    }
   }
 }
 </script>
@@ -152,6 +169,11 @@ button.secondary:not(:disabled):active {
   filter: brightness(.85);
 }
 
+button.suggested:disabled,
+button.secondary:disabled {
+  filter: grayscale(1);
+}
+
 .flex-right {
   margin-left: auto !important;
 }
@@ -159,6 +181,17 @@ button.secondary:not(:disabled):active {
 .text-muted {
   color: rgba(0, 0, 0, .7);
 }
+
+.text-center  { text-align: center; }
+.text-left    { text-align: left; }
+.text-right   { text-align: right; }
+.text-justify { text-align: justify; }
+
+.w-100  { width: 100%; }
+.w-75   { width: 75%; }
+.w-50   { width: 50%; }
+.w-25   { width: 25%; }
+.w-0    { width: 0; }
 
 .d-flex   { display: flex; }
 .d-block  { display: block; }
@@ -172,7 +205,11 @@ button.secondary:not(:disabled):active {
 
 .flex-1 { flex: 1; }
 .flex-ai-center { align-items: center; }
+.flex-ai-start { align-items: start; }
+.flex-ai-end { align-items: end; }
 .flex-jc-center { justify-content: center; }
+.flex-jc-start { justify-content: start; }
+.flex-jc-end { justify-content: end; }
 
 .vertical-slider {
   transition-property: all;

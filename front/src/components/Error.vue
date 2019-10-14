@@ -34,7 +34,7 @@ div.error.round {
   border-radius: 5px;
 }
 
-button.close-button {
+button.close-button.icon-button {
   position: absolute;
   right: 0;
   top: 0;

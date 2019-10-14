@@ -1,5 +1,5 @@
 <template>
-  <div class="feed-card">
+  <div v-if="logged" class="feed-card">
     <!-- Post header (profile picture, username) -->
     <div class="header">
       <img class="profile-pic" :src="post.user.picture">
@@ -31,7 +31,7 @@
         <v-icon v-if="liked" name="heart" style="color: rgb(237, 73, 68);"
           scale="1" />
         <v-icon v-else name="regular/heart" scale="1" />
-        <span v-if="post.user._id === $store.state.user._id" class="text-muted">
+        <span v-if="post.user._id === user._id" class="text-muted">
           {{ likeAmmount }}
         </span>
       </button>
@@ -70,6 +70,7 @@
 <script>
 import Comment from '@/components/Comment.vue';
 import { timeSince } from '@/modules/moment.js';
+import { mapState } from 'vuex';
 import axios from 'axios';
 
 export default {
@@ -91,17 +92,18 @@ export default {
   computed: {
     likeAmmount() {
       return this.$props.post.likes.length;
-    }
+    },
+    ...mapState(['user', 'logged']),
   },
   methods: {
     onLikeClicked() {
       axios.post(`/api/post/${this.$props.post._id}/like`)
         .then(({ data }) => {
           this.liked = !!data.liked;
-          let ind = this.$props.post.likes.indexOf(this.$store.state.user._id);
+          let ind = this.$props.post.likes.indexOf(this.user._id);
           // If liked and user _id not in likes
           if (this.liked && ind == -1)
-            this.$props.post.likes.push(this.$store.state.user._id);
+            this.$props.post.likes.push(this.user._id);
           // If not liked and user _id in likes
           else if (!this.liked && ind != -1)
             this.$props.post.likes.splice(ind, 1);
@@ -131,7 +133,7 @@ export default {
   },
   mounted() {
     this.liked =
-      this.$props.post.likes.indexOf(this.$store.state.user._id) != -1;
+      this.$props.post.likes.indexOf(this.user._id) != -1;
 
     // Hack to update time
     setInterval(() => {

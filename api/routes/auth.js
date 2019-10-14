@@ -104,7 +104,7 @@ router.post('/login', reqparams(loginPostParams), async (req, res) => {
   }
 });
 
-router.post('/validate/:tok', async (req, res) => {
+router.post('/validate/:tok', guard, async (req, res) => {
   console.log('Here with token: ' + req.params.tok);
   try {
     let user = await User.findOne({ "verification.code.tok": req.params.tok });
@@ -117,10 +117,10 @@ router.post('/validate/:tok', async (req, res) => {
 
       await user.save();
 
-      return res.status(200).json({ error: 'OK' });
+      return res.status(200).json({ user: req.user.getPersonalData() });
     }
     else {
-      return res.status(400).json({ error: 'INVALID_TOKEN' });
+      return res.status(400).json({ error: 'Invalid token' });
     }
   }
   catch(e) {
@@ -131,16 +131,16 @@ router.post('/validate/:tok', async (req, res) => {
 
 router.post('/revalidate', guard, async (req, res) => {
   try {
-    let response = 'Already verified.';
+    let response = 'ALREADY_VERIFIED';
 
     if (!req.user.verified) {
       req.user.verification.code = User.generateVerificationCode();
       await req.user.save();
       await Mailer.sendFromTemplate('validate', {
            from: process.env.MAIL_USER,
-             to: req.body.email,
+             to: req.user.email,
         subject: 'Account validation'
-      });
+      }, { code: req.user.verification.code.tok });
       response = 'Verification email re-sent.';
     }
 
