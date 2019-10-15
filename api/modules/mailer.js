@@ -31,8 +31,6 @@ module.exports = {
           locals.app_url = process.env.APP_URL;
         let content = contentFunction(locals);
 
-        console.log('Compiled template ', content);
-
         mailOptions.html = content;
         let transporter = getTransporter();
 

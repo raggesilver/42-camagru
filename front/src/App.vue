@@ -123,6 +123,10 @@ button {
   box-shadow:0 1px 2px rgba(0, 0, 0, .18);
 }
 
+button:not(.icon-button):hover {
+  filter: brightness(.95);
+}
+
 button.icon,
 button.icon-button {
   background: transparent;
@@ -313,6 +317,12 @@ button.secondary:disabled {
   padding: 1em;
   border-radius: 5px;
   box-shadow:0 2px 4px rgba(0, 0, 0, .18);
+}
+
+.warning {
+  background: rgb(219, 59, 33);
+  color: white;
+  font-weight: bold;
 }
 </style>
 

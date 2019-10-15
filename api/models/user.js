@@ -2,6 +2,7 @@ const mongoose  = require('mongoose');
 const jwt       = require('jsonwebtoken');
 const bcrypt    = require('bcrypt');
 const crypto    = require('crypto');
+const Mailer    = require('../modules/mailer');
 
 const schema = new mongoose.Schema({
   username: { type: String },
@@ -54,6 +55,21 @@ schema.statics.generateVerificationCode = () => {
   code.exp.setHours(code.exp.getHours() + 1);
 
   return (code);
+};
+
+/**
+ * Generate a new code and send it to the user's email.
+ * Throws Mailer/Mongoose errors.
+ */
+schema.methods.sendVerificationCode = async function (req) {
+  this.verification.code = this.constructor.generateVerificationCode();
+  await this.save();
+
+  return await Mailer.sendFromTemplate('validate', {
+        from: process.env.MAIL_USER,
+          to: req.body.email,
+     subject: 'Account validation'
+    }, { code: this.verification.code.tok });
 };
 
 schema.methods.getPersonalData = function () {

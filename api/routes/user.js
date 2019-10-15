@@ -1,7 +1,9 @@
 const router  = require('express').Router();
 const User    = require('../models/user');
 const Post    = require('../models/post');
+const Comment = require('../models/comment');
 const guard   = require('../modules/guard');
+const _       = require('@raggesilver/hidash');
 
 const { reqparams } = require('@raggesilver/reqparams');
 
@@ -68,65 +70,36 @@ const updatePostParams = {
   picture: {
     validate: (val) => typeof val === 'string',
     optional: true
-  }
-};
+  },
+  email: {
+    validate: async (val) => {
+      if (!/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+          .test(val))
+        return 'Invalid email.';
 
-/**
- * This function is VERY UNSAFE and should not be used anywhere else. It works
- * in this case because the keys are previously validated and guaranteed to be
- * valid
- */
-/**
- * @param {Object} o self
- * @param {String} s path
- */
-Object.getByString = function (o, s) {
-  let parts = s.trim().split('.');
-  let cur = o;
-  for (const part of parts) {
-    if (cur.hasOwnProperty(part))
-      cur = cur[part];
-    else {
-      cur = null;
-      break ;
-    }
-  }
-  return (cur);
-};
-
-/**
- * @param {Object} o self
- * @param {String} s path
- * @param {Any} val value
- */
-Object.setByString = function (o, s, val) {
-  let parts = s.trim().split('.');
-  let cur = o;
-  let i = 0;
-  for (const part of parts) {
-    if (typeof cur === 'object' && cur.hasOwnProperty(part)) {
-      if (i + 1 == parts.length) {
-        cur[part] = val;
-        return (cur[part]);
-      } else {
-        cur = cur[part];
+      try {
+        let user = await User.findOne({ email: val });
+        if (!user) return true;
       }
-    }
-    else
-      return undefined;
-    i++;
-  }
-  return (cur);
+      catch(e) {
+        console.error(e);
+      }
+      return 'Email in use.';
+    },
+    optional: true,
+  },
 };
 
-router.post('/update', [guard, reqparams(updatePostParams)], async (req, res) => {
-  const fields = [ 'username', 'settings.email_notify', 'picture' ];
+const updatePostMid = [ guard, reqparams(updatePostParams) ];
+
+router.post('/update', updatePostMid, async (req, res) => {
+  const fields = [ 'username', 'settings.email_notify', 'picture', 'email' ];
   try {
     let user = req.user;
     // Update valid keys
     for (const key in req.body) {
       if (fields.indexOf(key) == -1) continue ;
-      Object.setByString(user._doc, key, req.body[key]);
+      _.setByString(user, key, req.body[key]);
     }
 
     // Change password
@@ -136,8 +109,33 @@ router.post('/update', [guard, reqparams(updatePostParams)], async (req, res) =>
       user.password = await User.hashPassword(req.body.password);
     }
 
-    await user.save();
+    // Send the confirmation mail, calls user.save()
+    if ('email' in req.body) {
+      user.verified = false;
+      await user.sendVerificationCode(req);
+    }
+    // Save manually
+    else {
+      await user.save();
+    }
+
     return res.status(200).json(user);
+  }
+  catch(e) {
+    console.log(e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
+  }
+});
+
+router.post('/delete_self', guard, async (req, res) => {
+  try {
+    await Comment.deleteMany({ user: req.user._id });
+    await Post.deleteMany({ user: req.user._id });
+    await User.deleteOne({ _id: req.user._id });
+
+    delete req.user;
+
+    return res.status(200).json({});
   }
   catch(e) {
     console.log(e);
