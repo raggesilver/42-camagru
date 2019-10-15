@@ -75,7 +75,7 @@ const updatePostParams = {
     validate: async (val) => {
       if (!/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
           .test(val))
-        return 'Invalid email.';
+        return 'Invalid email';
 
       try {
         let user = await User.findOne({ email: val });
@@ -84,7 +84,7 @@ const updatePostParams = {
       catch(e) {
         console.error(e);
       }
-      return 'Email in use.';
+      return 'Email in use';
     },
     optional: true,
   },
@@ -103,10 +103,10 @@ router.post('/update', updatePostMid, async (req, res) => {
     }
 
     // Change password
-    if ('password' in req.body && 'oldPassword' in req.body) {
+    if ('newPassword' in req.body && 'oldPassword' in req.body) {
       if (!(await user.comparePassword(req.body.oldPassword)))
         return res.status(400).json({ error: 'Invalid password' });
-      user.password = await User.hashPassword(req.body.password);
+      user.password = await User.hashPassword(req.body.newPassword);
     }
 
     // Send the confirmation mail, calls user.save()
@@ -119,7 +119,7 @@ router.post('/update', updatePostMid, async (req, res) => {
       await user.save();
     }
 
-    return res.status(200).json(user);
+    return res.status(200).json(user.getPersonalData());
   }
   catch(e) {
     console.log(e);

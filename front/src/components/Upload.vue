@@ -423,6 +423,8 @@ export default {
         console.log(err);
       });
 
+    // FIXME: This approach to drag-n-drop only works with mouse events which
+    // means no mobile sticker dragging
     this.cc = document.querySelector('div.canvas-container');
     let target = null;
     let click = { sx: null, sy: null, cx: null, cy: null };
@@ -475,14 +477,6 @@ export default {
         document.onmouseup = onMouseUp;
       }
     });
-
-    // this.cc.addEventListener('click', (e) => {
-    //   if (!e.target) return ;
-
-    //   if (e.target.classList.contains('floating-sticker')) {
-    //     this.stickers.splice(e.target.id.split('-'))
-    //   }
-    // });
   },
   beforeDestroy() {
     // Stop using webcam once the component is destroyed (on $emit('close'))
