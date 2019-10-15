@@ -7,6 +7,9 @@
   "author": "Paulo Queiroz <pvaqueiroz@gmail.com>",
   "license": "GPL-3.0",
   "private": false,
+  "scripts" : {
+    "server": "node -r dotenv/config server.js"
+  },
   "dependencies": {
     "@raggesilver/hidash": "^1.0.0",
     "@raggesilver/reqparams": "^1.2.1",
