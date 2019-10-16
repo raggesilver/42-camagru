@@ -44,6 +44,11 @@ const router = new Router({
       },
     },
     {
+      path: '/resetpassword',
+      name: 'resetpassword',
+      component: () => import('./views/Reset.vue'),
+    },
+    {
       path: '/profile/:username',
       name: 'profile',
       component: () => import('./views/Profile.vue'),

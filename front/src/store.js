@@ -11,8 +11,6 @@ function signFunction(context, url, data) {
         const token = res.data.token;
         const user  = res.data.user;
 
-        axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
 
@@ -40,6 +38,11 @@ export default new Vuex.Store({
     setToken: (state, data) => {
       state.token = data;
       state.logged = !!data;
+
+      if (data)
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + data;
+      else
+        delete axios.defaults.headers.common['Authorization'];
     },
     setUser: (state, data) => {
       state.user = data;

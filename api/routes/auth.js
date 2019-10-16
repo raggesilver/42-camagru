@@ -189,7 +189,11 @@ router.post('/reset_request', reqparams(rreqPostParams), async (req, res) => {
 
 const rpasPostParams = {
   tok: {}, // No validation, just needs to be present
-  password: { validate: validatePassword },
+  password: {
+    validate: validatePassword,
+         msg: 'Password must have at least 8 characters, one special character '
+              + 'and one number.'
+  },
 };
 
 router.post('/reset_password', reqparams(rpasPostParams), async (req, res) => {

@@ -215,6 +215,9 @@ button.secondary:disabled {
 .flex-jc-start { justify-content: start; }
 .flex-jc-end { justify-content: end; }
 
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
 .vertical-slider {
   transition-property: all;
   transition-duration: .5s;

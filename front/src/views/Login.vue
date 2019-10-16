@@ -3,8 +3,8 @@
 
     <h1>Sign in</h1>
 
-    <Error v-if="errorMessage" :error="errorMessage" :round="true"
-      @dismiss="() => this.errorMessage = null"/>
+    <Error v-if="error" :error="error" :round="true"
+      @dismiss="() => this.error = null"/>
 
     <form @submit="onSubmit">
       <div class="input-group flex-1 mt-1">
@@ -31,23 +31,22 @@
       </small>
     </form>
 
-    <!-- <div class="errors" v-if="errorMessage">
-      {{ errorMessage }}
-    </div> -->
   </div>
 </template>
 
 <script>
 import Error from '@/components/Error.vue';
 import AsyncButton from '@/components/AsyncButton.vue';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       email: null,
       password: null,
-      errorMessage: null,
-      loading: false
+      error: null,
+      loading: false,
+      resetting: false,
     };
   },
   components: {
@@ -61,7 +60,7 @@ export default {
       if (!(this.email && this.password))
         return ;
       // Reset error message
-      this.errorMessage = null;
+      this.error = null;
 
       try {
         let res = await this.$store
@@ -73,11 +72,32 @@ export default {
       }
       catch(err) {
         if (err.response && err.response.data.error)
-          this.errorMessage = err.response.data.error;
+          this.error = err.response.data.error;
       }
     },
     onForgotPass(e) {
       e.preventDefault();
+
+      this.error = null;
+
+      if (this.resetting)
+        return ;
+
+      if (!this.email)
+        return this.error = 'Email required for password reset';
+
+      this.resetting = true;
+      axios.post('/api/auth/reset_request', { email: this.email })
+        .then(() => {
+          this.$router.push('/resetpassword');
+        })
+        .catch((err) => {
+          if (err.response)
+            this.error = err.response.data.error;
+          else
+            console.log(err);
+        })
+        .finally(() => this.resetting = true);
     },
   }
 }
