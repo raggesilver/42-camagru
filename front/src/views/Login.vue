@@ -97,7 +97,7 @@ export default {
           else
             console.log(err);
         })
-        .finally(() => this.resetting = true);
+        .finally(() => this.resetting = false);
     },
   }
 }

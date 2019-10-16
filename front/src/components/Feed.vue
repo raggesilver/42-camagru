@@ -1,6 +1,6 @@
 <template>
   <div class="feed">
-    <FeedCard v-for="post in posts" :key="post._id" :post="post"/>
+    <FeedCard v-for="post in posts" :key="post._id" :post="post" @deleteSelf="onDeletePost"/>
     <div v-show="loading || end" style="margin: 6em 0;">
       <v-icon v-show="loading" name="circle-notch" spin scale="2"/>
       <p v-show="end" style="margin: 0;" class="text-muted">
@@ -34,20 +34,6 @@ export default {
   components: {
     FeedCard
   },
-  // watch: {
-  //   loading(_new) {
-  //     if (_new && this.atBottom())
-  //       this.$nextTick(() => {
-  //         window.scrollTo(0, document.body.scrollHeight);
-  //       });
-  //   },
-  //   end(_new) {
-  //     if (_new && this.atBottom())
-  //       this.$nextTick(() => {
-  //         window.scrollTo(0, document.body.scrollHeight);
-  //       });
-  //   }
-  // },
   methods: {
     atBottom() {
       return Math.ceil(window.pageYOffset + window.innerHeight) >=
@@ -75,7 +61,10 @@ export default {
         })
         .catch(err => console.log(err))
         .finally(() => this.loading = false);
-    }
+    },
+    onDeletePost(post) {
+      this.posts = this.posts.filter(p => p._id != post.$props.post._id);
+    },
   },
   mounted() {
     // If there is a source we don't need to connect anything

@@ -64,16 +64,23 @@ API endpoints can be accessed from `/api`.
 
 ## Todo
 
-- Delete posts
+- ~~Delete posts~~ - done
 - Login with username
 - Thumbnails with previous pictures
 - ~~Forgot password email link~~ - done
 
 ## Bonuses
 
+**Suggested**:
+
 - "AJAXIFIED" - it's axios actually
 - Infinite gallery
+
+**Mine**:
+
 - Time ago countdown
 - Hashtag highlight
 - Filters
 - Auto login on register
+- Email links (user, post and comment) back to the website
+- Auto scroll focus on email links

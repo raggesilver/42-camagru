@@ -24,7 +24,7 @@
         <v-icon name="sign-out-alt" class="fa-fw"/>
       </button>
       <button v-else class="icon-button d-flex flex-ai-center"
-        @click="$router.push('/login')"
+        @click="() => $router.push('/login').catch(() => {})"
       >
         <v-icon name="sign-in-alt" class="fa-fw"/>
         <span class="ml-1">Sign in</span>

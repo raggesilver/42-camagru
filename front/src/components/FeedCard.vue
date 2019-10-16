@@ -17,9 +17,26 @@
           {{ postDate }}
         </span>
       </div>
-      <button class="icon-button flex-right">
-        <v-icon name="ellipsis-v" scale="0.85" />
+
+      <button v-if="isMine" class="icon-button flex-right"
+        @click="showMenu = !showMenu">
+        <v-icon v-if="showMenu" name="times" scale="0.85" class="fa-fw times"/>
+        <v-icon v-else name="ellipsis-v" scale="0.85" class="fa-fw"/>
       </button>
+
+      <!-- Menu -->
+      <div v-if="isMine" class="menu" :class="{ show: showMenu }">
+        <ul>
+          <li class="disabled flex-ai-center">
+            <span class="mr-2">Edit post</span>
+            <v-icon name="pencil-alt" scale="0.6" class="ml-auto"/>
+          </li>
+          <li class="flex-ai-center" @click="deletePost">
+            <span class="mr-2">Delete post</span>
+            <v-icon name="trash" scale="0.6" class="ml-auto"/>
+          </li>
+        </ul>
+      </div>
     </div>
     <!-- Foreach image in post -->
     <img v-for="(img, i) in post.media" :key="i" :src="img"
@@ -83,6 +100,7 @@ export default {
       comment: null,
       commenting: false,
       showComment: false,
+      showMenu: false,
       postDate: timeSince(new Date(this.$props.post.createdAt)) + ' ago',
     };
   },
@@ -94,6 +112,9 @@ export default {
       return this.$props.post.likes.length;
     },
     ...mapState(['user', 'logged']),
+    isMine() {
+      return this.post.user._id === this.user._id;
+    },
   },
   methods: {
     onLikeClicked() {
@@ -119,7 +140,6 @@ export default {
         text: this.comment
       })
         .then(({ data }) => {
-          console.log(data);
           if (data.comment)
             this.$props.post.comments.push(data.comment);
           this.comment = null;
@@ -129,6 +149,11 @@ export default {
     },
     onShowNewComment() {
       this.showComment = !this.showComment;
+    },
+    async deletePost() {
+      axios.post(`/api/post/${this.post._id}/delete`)
+        .then(() => this.$emit('deleteSelf', this))
+        .catch((err) => console.log(err));
     },
   },
   mounted() {
@@ -144,9 +169,14 @@ export default {
 </script>
 
 <style scoped>
+.deleted {
+  display: none !important;
+}
+
 .header {
   display: flex;
   padding: calc(1em - 6px) 0;
+  position: relative;
 }
 
 .header .name {
@@ -214,5 +244,63 @@ img:not(.profile-pic) {
 
 .new-comment button {
   padding-right: 1.5em;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% - 1.25em);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  font-size: 10pt;
+  border-radius: 5px;
+}
+
+.menu:not(.show) {
+  display: none;
+}
+
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu ul li {
+  padding: .5em 1em;
+  user-select: none;
+  display: flex;
+}
+
+.menu ul li:not(.disabled) {
+  cursor: pointer;
+}
+
+.menu ul li.disabled {
+  color:rgba(0, 0, 0, 0.4);
+}
+
+.menu ul li:not(.disabled):hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.menu ul li:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@keyframes times {
+  /* 0% { transform: rotate(45deg); } */
+  100% { transform: rotate(0deg); }
+}
+
+.header .fa-icon {
+  width: 15px;
+}
+
+.times {
+  transform: rotate(45deg);
+  animation: times .2s;
+  animation-fill-mode: forwards;
 }
 </style>

@@ -203,9 +203,24 @@ router.post('/upload_image', uploadPostMid, async (req, res) => {
   }
 });
 
-// router.use((req, res, next, error) => {
-//   console.log(error);
-//   return res.status(500).json({ error: 'INTERNAL_ERROR' });
-// });
+router.post('/:id/delete', guard, async (req, res) => {
+  try {
+    let post = await Post.findById(req.params.id)
+      .populate('user')
+      .exec();
+    if (post) {
+      if (req.user._id.toString() !== post.user._id.toString())
+        return res.status(401).json({ error: 'Post does belong to you' });
+      await Comment.deleteMany({ _id: { $in: post.comments } });
+      await Post.deleteOne({ _id: post._id });
+      return res.status(200).json({});
+    }
+    return res.status(404).json({ error: 'Post does not exist' });
+  }
+  catch (e) {
+    console.log(e);
+    return res.status(500).json({error:'INTERNAL_ERROR'});
+  }
+});
 
 module.exports = router;

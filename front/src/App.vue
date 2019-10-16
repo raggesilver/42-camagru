@@ -227,6 +227,8 @@ button.secondary:disabled {
 
 .vertical-slider:not(.show) {
   max-height: 0 !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
 }
 
 .p-0 { padding: 0em !important; }
