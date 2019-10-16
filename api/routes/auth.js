@@ -81,13 +81,13 @@ router.post('/register', reqparams(registerPostParams), async (req, res) => {
 });
 
 const loginPostParams = {
-  email:    { validate: notEmpty },
+  username:    { validate: notEmpty },
   password: { validate: notEmpty }
 };
 
 router.post('/login', reqparams(loginPostParams), async (req, res) => {
   try {
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ username: req.body.username });
     if (!user || !(await user.comparePassword(req.body.password)))
       return res.status(401).json({ error: 'Invalid credentials' });
 
@@ -153,12 +153,12 @@ router.post('/revalidate', guard, async (req, res) => {
 });
 
 const rreqPostParams = {
-  email: {}, // No validation, just needs to be present
+  username: {}, // No validation, just needs to be present
 };
 
 router.post('/reset_request', reqparams(rreqPostParams), async (req, res) => {
   try {
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ username: req.body.username });
     if (user) {
       if (user.verified) {
         await user.sendResetCode(req);
@@ -190,9 +190,9 @@ router.post('/reset_request', reqparams(rreqPostParams), async (req, res) => {
 const rpasPostParams = {
   tok: {}, // No validation, just needs to be present
   password: {
-    validate: validatePassword,
-         msg: 'Password must have at least 8 characters, one special character '
-              + 'and one number.'
+  validate: validatePassword,
+       msg: 'Password must have at least 8 characters, one special character '
+            + 'and one number.'
   },
 };
 

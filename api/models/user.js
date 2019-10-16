@@ -76,13 +76,13 @@ schema.statics.generateResetCode = () => {
  * Generate a new reset code and send it to the user's email.
  * Throws Mailer/Mongoose errors.
  */
-schema.methods.sendResetCode = async function (req) {
+schema.methods.sendResetCode = async function () {
   this.verification.reset = this.constructor.generateResetCode();
   await this.save();
 
   return await Mailer.sendFromTemplate('passwordreset', {
         from: process.env.MAIL_USER,
-          to: req.body.email,
+          to: this.email,
      subject: 'Password reset'
     }, { tok: this.verification.reset.tok, user: this });
 };

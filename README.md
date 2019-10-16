@@ -65,7 +65,7 @@ API endpoints can be accessed from `/api`.
 ## Todo
 
 - ~~Delete posts~~ - done
-- Login with username
+- ~~Login with username~~ - done
 - Thumbnails with previous pictures
 - ~~Forgot password email link~~ - done
 

@@ -8,7 +8,7 @@
 
     <form @submit="onSubmit">
       <div class="input-group flex-1 mt-1">
-        <input type="email" id="emailInput" v-model="email" class="input" placeholder="Email">
+        <input type="text" id="emailInput" v-model="username" class="input" placeholder="Username">
       </div>
 
       <div class="input-group flex-1 mt-1">
@@ -42,7 +42,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      email: null,
+      username: null,
       password: null,
       error: null,
       loading: false,
@@ -57,14 +57,14 @@ export default {
     async onSubmit(e) {
       // Prevent form submit
       e.preventDefault();
-      if (!(this.email && this.password))
+      if (!(this.username && this.password))
         return ;
       // Reset error message
       this.error = null;
 
       try {
         let res = await this.$store
-          .dispatch('login', { email: this.email, password: this.password });
+          .dispatch('login', { username: this.username, password: this.password });
         if (res.data.user.verified)
           this.$router.push('/');
         else
@@ -83,11 +83,11 @@ export default {
       if (this.resetting)
         return ;
 
-      if (!this.email)
-        return this.error = 'Email required for password reset';
+      if (!this.username)
+        return this.error = 'Username required for password reset';
 
       this.resetting = true;
-      axios.post('/api/auth/reset_request', { email: this.email })
+      axios.post('/api/auth/reset_request', { username: this.username })
         .then(() => {
           this.$router.push('/resetpassword');
         })
