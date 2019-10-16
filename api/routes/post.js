@@ -3,6 +3,7 @@ const guard   = require('../modules/guard');
 const Post    = require('../models/post');
 const Comment = require('../models/comment');
 const Imgur   = require('../modules/imgur');
+const Mailer  = require('../modules/mailer');
 
 const { reqparams, notEmpty } = require('@raggesilver/reqparams');
 
@@ -81,7 +82,7 @@ router.post('/with_picture', postPostMid, async (req, res) => {
 
 router.post('/:id/like', guard, async (req, res) => {
   try {
-    let post = await Post.findById(req.params.id);
+    let post = await Post.findById(req.params.id).populate('user', '-password');
     if (post) {
       let index = post.likes.indexOf(req.user._id);
       // Unlike
@@ -91,6 +92,24 @@ router.post('/:id/like', guard, async (req, res) => {
       // Like
       else {
         post.likes.push(req.user._id);
+        // If not liking own post and poster has email_notify enabled
+        if (req.user._id.toString() != post.user._id.toString() &&
+            post.user.settings.email_notify) {
+          // Send email
+          // The reason why this done not using await is so that the user
+          // doesnt experience slow liking (due to the server waiting to the
+          // mail response)
+          Mailer.sendFromTemplate('onlike', {
+               from: process.env.MAIL_USER,
+                 to: post.user.email,
+            subject: `${req.user.username} liked your picture`,
+          }, {
+            user: req.user,
+            post: post,
+          })
+          .then((info) => console.log(info))
+          .catch((err) => console.log('Could not send like mail', err));
+        }
       }
       await post.save();
       return res.status(200).json({ liked: index == -1 });
@@ -116,7 +135,7 @@ const commentPostMid = [
 
 router.post('/:id/comment', commentPostMid, async (req, res) => {
   try {
-    let post = await Post.findById(req.params.id);
+    let post = await Post.findById(req.params.id).populate('user', '-password');
     if (post) {
       let comment = new Comment({
         text: req.body.text.trim(),
@@ -130,6 +149,26 @@ router.post('/:id/comment', commentPostMid, async (req, res) => {
       await post.save();
       // Populate comment.user for the response
       await comment.populate('user', 'username picture').execPopulate();
+
+      // If not liking own post and poster has email_notify enabled
+      if (req.user._id.toString() != post.user._id.toString() &&
+          post.user.settings.email_notify) {
+        // Send email
+        // The reason why this done not using await is so that the user
+        // doesnt experience slow liking (due to the server waiting to the
+        // mail response)
+        Mailer.sendFromTemplate('oncomment', {
+             from: process.env.MAIL_USER,
+               to: post.user.email,
+          subject: `${req.user.username} commented your picture`,
+        }, {
+          user: req.user,
+          post: post,
+        })
+        .then((info) => console.log(info))
+        .catch((err) => console.log('Could not send comment mail', err));
+      }
+
       return res.status(200).json({ comment });
     }
     return res.status(404).json({ error: 'Post does not exist.' });

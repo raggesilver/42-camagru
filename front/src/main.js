@@ -6,11 +6,14 @@ import axios from 'axios'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = true
 Vue.config.devtools = true
 
+let port = window.location.port;
+if (port !== '')
+  port = ':' + ((port == '8080') ? '3000' : port);
 axios.defaults.baseURL =
-  `${window.location.protocol}//${window.location.hostname}:3000`;
+  `${window.location.protocol}//${window.location.hostname}${port}`;
 
 axios.interceptors.response.use(null, (err) => {
   if (!err.response) {
