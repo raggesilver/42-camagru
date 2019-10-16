@@ -103,7 +103,6 @@ router.post('/login', reqparams(loginPostParams), async (req, res) => {
 });
 
 router.post('/validate/:tok', guard, async (req, res) => {
-  // console.log('Here with token: ' + req.params.tok);
   try {
     let user = await User.findOne({ "verification.code.tok": req.params.tok });
     if (user) {
