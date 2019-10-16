@@ -15,7 +15,7 @@ function log(...args) {
  * Initialize the app
  */
 app.use(cors({ credentials: true, origin: true }));
-const historyMiddleware = history({ verbose: true });
+const historyMiddleware = history();
 // Do redirect /api calls to front-end
 app.use((req, res, next) => {
   if (req.path.startsWith('/api'))

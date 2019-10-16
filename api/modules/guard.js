@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
         return next();
       }
     }
-    catch(e) { console.log(e); }
+    catch(e) { e; }
     return res.status(401).end();
   });
 };

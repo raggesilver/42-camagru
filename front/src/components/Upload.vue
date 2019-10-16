@@ -420,7 +420,7 @@ export default {
       })
       .catch((err) => {
         this.error = "Can't access camera :(";
-        console.log(err);
+        err;
       });
 
     // FIXME: This approach to drag-n-drop only works with mouse events which

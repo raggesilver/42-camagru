@@ -95,7 +95,7 @@ export default {
           if (err.response)
             this.error = err.response.data.error;
           else
-            console.log(err);
+            err;
         })
         .finally(() => this.resetting = false);
     },

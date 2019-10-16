@@ -37,7 +37,7 @@ router.get('/profile/:username', guard, async (req, res) => {
       return res.status(404).json({ error: 'User does not exist' });
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
@@ -56,7 +56,7 @@ const updatePostParams = {
         if (!user) return true;
       }
       catch(e) {
-        console.log(e);
+        e;
       }
 
       return 'Username in use';
@@ -122,7 +122,7 @@ router.post('/update', updatePostMid, async (req, res) => {
     return res.status(200).json(user.getPersonalData());
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
@@ -138,7 +138,7 @@ router.post('/delete_self', guard, async (req, res) => {
     return res.status(200).json({});
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });

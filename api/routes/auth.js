@@ -61,13 +61,11 @@ router.post('/register', reqparams(registerPostParams), async (req, res) => {
 
     await user.save();
 
-    let info = await Mailer.sendFromTemplate('validate', {
+    await Mailer.sendFromTemplate('validate', {
          from: process.env.MAIL_USER,
            to: req.body.email,
       subject: 'Account validation'
     }, { code: user.verification.code.tok });
-
-    console.log(info);
 
     return res.status(200).json({
       token: user.getToken(),
@@ -147,7 +145,7 @@ router.post('/revalidate', guard, async (req, res) => {
     return res.status(200).json({ msg: response });
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
@@ -182,7 +180,7 @@ router.post('/reset_request', reqparams(rreqPostParams), async (req, res) => {
     }
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });
@@ -216,7 +214,7 @@ router.post('/reset_password', reqparams(rpasPostParams), async (req, res) => {
     }
   }
   catch(e) {
-    console.log(e);
+    e;
     return res.status(500).json({ error: 'INTERNAL_ERROR' });
   }
 });

@@ -100,7 +100,7 @@ export default {
             this.tok = null;
           }
           else
-            console.log(err);
+            err;
         });
     },
   },

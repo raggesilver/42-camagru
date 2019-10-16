@@ -129,7 +129,7 @@ export default {
           else if (!this.liked && ind != -1)
             this.$props.post.likes.splice(ind, 1);
         })
-        .catch(err => console.log(err));
+        .catch(err => err);
     },
     onNewComment(e) {
       e.preventDefault();
@@ -144,7 +144,7 @@ export default {
             this.$props.post.comments.push(data.comment);
           this.comment = null;
         })
-        .catch((err) => console.log(err))
+        .catch((err) => err)
         .finally(() => this.commenting = false);
     },
     onShowNewComment() {
@@ -153,7 +153,7 @@ export default {
     async deletePost() {
       axios.post(`/api/post/${this.post._id}/delete`)
         .then(() => this.$emit('deleteSelf', this))
-        .catch((err) => console.log(err));
+        .catch((err) => err);
     },
   },
   mounted() {

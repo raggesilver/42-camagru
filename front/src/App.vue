@@ -36,7 +36,6 @@ export default {
     },
     fetchUser() {
       this.$store.dispatch('getUser')
-        // FIXME: remove console.log
         .then((user) => {
           if (!user.verified && this.$route.path != '/validate')
             return this.$router.replace('/validate');
@@ -49,7 +48,7 @@ export default {
               this.error = err.response.data.error;
           }
           else
-            console.log(err);
+            err;
         });
     }
   },

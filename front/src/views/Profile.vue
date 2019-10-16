@@ -200,7 +200,7 @@ export default {
         if (err.response)
           this.editError = err.response.data.error;
         else
-          console.log(err);
+          err;
       }
     },
   },

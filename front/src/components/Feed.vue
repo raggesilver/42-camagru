@@ -59,7 +59,7 @@ export default {
           if (data.length < 10)
             this.end = true;
         })
-        .catch(err => console.log(err))
+        .catch(err => err)
         .finally(() => this.loading = false);
     },
     onDeletePost(post) {
