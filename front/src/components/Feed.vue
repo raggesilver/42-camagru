@@ -70,6 +70,8 @@ export default {
     // If there is a source we don't need to connect anything
     if (this.$props.source) {
       this.posts = this.$props.source;
+      // If there is a source there is a fixed end
+      this.end = true;
     }
     else {
       // Get initial posts
