@@ -69,8 +69,6 @@ router.beforeEach((to, from, next) => {
   if (store.state.logged && store.state.user &&
       !store.state.user.verified && to.path != '/validate') {
     // Logged into unverified account at any route
-    console.log('Redirecting to validate');
-    console.log(store.state.logged, store.state.user, !store.state.user.verified, to.path != '/validate');
     next('/validate');
   }
   // Guarded route

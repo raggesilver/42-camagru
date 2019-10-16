@@ -121,7 +121,6 @@ export default {
 
       axios.get(`/api/user/profile/${this.$route.params.username}`)
         .then(({data}) => {
-          // console.log(data);
           this.user = data.user;
           this.posts = data.posts;
 

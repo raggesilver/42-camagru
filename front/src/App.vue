@@ -38,7 +38,6 @@ export default {
       this.$store.dispatch('getUser')
         // FIXME: remove console.log
         .then((user) => {
-          console.log('User updated, cache overwritten.');
           if (!user.verified && this.$route.path != '/validate')
             return this.$router.replace('/validate');
         })

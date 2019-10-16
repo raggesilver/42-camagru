@@ -1,13 +1,13 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import axios from 'axios'
-import 'vue-awesome/icons'
-import Icon from 'vue-awesome/components/Icon'
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
+import store from './store';
+import axios from 'axios';
+import 'vue-awesome/icons';
+import Icon from 'vue-awesome/components/Icon';
 
-Vue.config.productionTip = true
-Vue.config.devtools = true
+Vue.config.productionTip = true;
+Vue.config.devtools = false;
 
 let port = window.location.port;
 if (port !== '')
@@ -33,10 +33,10 @@ const bus = new Vue();
 Vue.prototype.$http = axios;
 Vue.prototype.$bus = bus;
 
-Vue.component('v-icon', Icon)
+Vue.component('v-icon', Icon);
 
 new Vue({
   router,
   store,
   render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');
