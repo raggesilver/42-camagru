@@ -66,7 +66,7 @@ API endpoints can be accessed from `/api`.
 
 - ~~Delete posts~~ - done
 - ~~Login with username~~ - done
-- Thumbnails with previous pictures
+- ~~Thumbnails with previous pictures~~ - Profile counts as it is not mandatory
 - ~~Forgot password email link~~ - done
 
 ## Bonuses
