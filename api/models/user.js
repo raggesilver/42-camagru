@@ -18,6 +18,10 @@ const schema = new mongoose.Schema({
     code: {
       tok: { type: String },
       exp: { type: Date }
+    },
+    reset: {
+      tok: { type: String },
+      exp: { type: Date }
     }
   }
 });
@@ -55,6 +59,32 @@ schema.statics.generateVerificationCode = () => {
   code.exp.setHours(code.exp.getHours() + 1);
 
   return (code);
+};
+
+schema.statics.generateResetCode = () => {
+  code = {
+    tok: crypto.randomBytes(20).toString('hex'),
+    exp: new Date()
+  };
+
+  code.exp.setHours(code.exp.getHours() + 1);
+
+  return (code);
+};
+
+/**
+ * Generate a new reset code and send it to the user's email.
+ * Throws Mailer/Mongoose errors.
+ */
+schema.methods.sendResetCode = async function (req) {
+  this.verification.reset = this.constructor.generateResetCode();
+  await this.save();
+
+  return await Mailer.sendFromTemplate('passwordreset', {
+        from: process.env.MAIL_USER,
+          to: req.body.email,
+     subject: 'Password reset'
+    }, { tok: this.verification.reset.tok, user: this });
 };
 
 /**

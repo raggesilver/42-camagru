@@ -152,4 +152,69 @@ router.post('/revalidate', guard, async (req, res) => {
   }
 });
 
+const rreqPostParams = {
+  email: {}, // No validation, just needs to be present
+};
+
+router.post('/reset_request', reqparams(rreqPostParams), async (req, res) => {
+  try {
+    let user = await User.findOne({ email: req.body.email });
+    if (user) {
+      if (user.verified) {
+        await user.sendResetCode(req);
+        return res.status(200).json({});
+      }
+      // If the user hasn't verified the account reject password reset
+      else {
+        // FIXME: This creates a situation where an user who created an account
+        // and didn't verify it and forgot their password can't log in to their
+        // account ever again.
+        return res.status(400).json({ error: 'Email not verified' });
+      }
+    }
+    else {
+      // Usually this would result in a 404 (user/email does not exist) but in
+      // order to prevent bruteforce account discovery this will throw a 400
+      // masked as an Bad request. I know in this implementation this isn't
+      // actually doing anything since this is the only 400 + Bad request in
+      // the entire server, but it's probably enough for Camagru.
+      return res.status(400).json({ error: 'Bad request' });
+    }
+  }
+  catch(e) {
+    console.log(e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
+  }
+});
+
+const rpasPostParams = {
+  tok: {}, // No validation, just needs to be present
+  password: { validate: validatePassword },
+};
+
+router.post('/reset_password', reqparams(rpasPostParams), async (req, res) => {
+  try {
+    let user = await User.findOne({ 'verification.reset.tok': req.body.tok });
+    if (user) {
+      // Verify that the token is still valid
+      if (new Date(user.verification.reset.exp) < new Date())
+        return res.status(400).json({ error: 'Token expired' });
+      user.verification.reset = null;
+      user.password = await User.hashPassword(req.body.password);
+      await user.save();
+      return res.status(200).json({
+        token: user.getToken(),
+        user: user.getPersonalData(),
+      });
+    }
+    else {
+      return res.status(400).json({ error: 'Invalid token' });
+    }
+  }
+  catch(e) {
+    console.log(e);
+    return res.status(500).json({ error: 'INTERNAL_ERROR' });
+  }
+});
+
 module.exports = router;

@@ -155,7 +155,7 @@ router.post('/:id/comment', commentPostMid, async (req, res) => {
           post.user.settings.email_notify) {
         // Send email
         // The reason why this done not using await is so that the user
-        // doesnt experience slow liking (due to the server waiting to the
+        // doesnt experience slow commenting (due to the server waiting to the
         // mail response)
         Mailer.sendFromTemplate('oncomment', {
              from: process.env.MAIL_USER,

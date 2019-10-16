@@ -5,7 +5,7 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     meta(http-equiv="X-UA-Compatible", content="ie=edge")
     title Hey #{post.user.username}, someone commented your picture.
-  body
+  body(style={'font-family': 'Avenir,Helvetica,Arial,sans-serif'})
     a(href=`${app_url}/profile/${user.username}`) #{user.username}
     | &nbsp;commented your&nbsp;
     a(href=`${app_url}/profile/${post.user.username}/#post-${post._id}`) post

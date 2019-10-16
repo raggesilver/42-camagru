@@ -5,7 +5,7 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     meta(http-equiv="X-UA-Compatible", content="ie=edge")
     title Validate your email address
-  body
+  body(style={'font-family': 'Avenir,Helvetica,Arial,sans-serif'})
     | You need to validate you email before you can use your account
     br
     a(href=`${app_url}/validate?tok=${code}`) #{app_url}/validate?tok=#{code}
