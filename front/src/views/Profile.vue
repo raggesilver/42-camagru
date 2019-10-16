@@ -124,6 +124,9 @@ export default {
           // console.log(data);
           this.user = data.user;
           this.posts = data.posts;
+
+          if (this.$route.hash !== '')
+            setTimeout(() => location.href = this.$route.hash, 2000);
         })
         .catch((err) => {
           if (err.response)

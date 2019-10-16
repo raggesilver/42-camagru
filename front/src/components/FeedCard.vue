@@ -1,5 +1,5 @@
 <template>
-  <div v-if="logged" class="feed-card">
+  <div v-if="logged" class="feed-card" :id="`post-${post._id}`">
     <!-- Post header (profile picture, username) -->
     <div class="header">
       <img class="profile-pic" :src="post.user.picture">
