@@ -41,8 +41,10 @@ function startApp() {
 }
 
 const mongoOpts = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+     useNewUrlParser: true,
+  useUnifiedTopology: true,
+   reconnectInterval: 30000, // Try to reconnect after 30s
+      reconnectTries: 600, // Just be a little more persistent (try for 5 hours)
 };
 
 /**
